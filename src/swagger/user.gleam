@@ -1,10 +1,11 @@
-import gleam/dynamic.{type Dynamic, bool, field, int, string}
-import gleam/http.{Get}
+import gleam/bool
+import gleam/dynamic.{bool, field, int, string}
+import gleam/http
 import gleam/http/request.{type Request}
-import gleam/http/response
+import gleam/int
 import gleam/json
 import gleam/option.{type Option}
-import gleam/result
+import gleam/string
 import swagger/internal/decoders
 import swagger/settings.{type Settings}
 
@@ -197,15 +198,36 @@ pub fn get_authed_times(
 }
 
 pub fn search(
-  q query: Option(String),
+  settings settings: Settings,
+  query q: Option(String),
   uid uid: Option(Int),
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let uid = uid |> option.map(int.to_string)
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      q |> option.map(fn(x) { #("q", x) }),
+      uid |> option.map(fn(x) { #("uid", x) }),
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/search")
+  |> request.set_query(query)
 }
 
-pub fn get_user(settings: Settings, username username: String) -> Request(String) {
+pub fn get_user(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
@@ -213,84 +235,236 @@ pub fn get_user(settings: Settings, username username: String) -> Request(String
 }
 
 pub fn get_activity_feeds(
+  settings settings: Settings,
   username username: String,
   only_performed_by only: Option(Bool),
   date date: Option(String),
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let only = only |> option.map(bool.to_string) |> option.map(string.lowercase)
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      only |> option.map(fn(x) { #("only-performed-by", x) }),
+      date |> option.map(fn(x) { #("date", x) }),
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/activities/feeds")
+  |> request.set_query(query)
 }
 
 pub fn get_followers(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/followers")
+  |> request.set_query(query)
 }
 
 pub fn get_following(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/following")
+  |> request.set_query(query)
 }
 
-pub fn get_is_following(username username: String, target target: String) -> Nil {
-  todo
+pub fn get_is_following(
+  settings settings: Settings,
+  username username: String,
+  target target: String,
+) -> Request(String) {
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/following/" <> target)
 }
 
 pub fn get_gpg_keys(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/gpg_keys")
+  |> request.set_query(query)
 }
 
-pub fn get_heatmap(username username: String) -> Nil {
-  todo
+pub fn get_heatmap(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/heatmap")
 }
 
 pub fn get_keys(
+  settings settings: Settings,
   username username: String,
   fingerprint fingerprint: Option(String),
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      fingerprint |> option.map(fn(x) { #("fingerprint", x) }),
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/keys")
+  |> request.set_query(query)
 }
 
 pub fn get_repos(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/repos")
+  |> request.set_query(query)
 }
 
 pub fn get_starred(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/starred")
+  |> request.set_query(query)
 }
 
 pub fn get_subscriptions(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/subscriptions")
+  |> request.set_query(query)
 }
 
 pub fn get_tokens(
+  settings settings: Settings,
   username username: String,
   page page: Option(Int),
   limit limit: Option(Int),
-) -> Nil {
-  todo
+) -> Request(String) {
+  let page = page |> option.map(int.to_string)
+  let limit = limit |> option.map(int.to_string)
+
+  let query =
+    [
+      page |> option.map(fn(x) { #("page", x) }),
+      limit |> option.map(fn(x) { #("limit", x) }),
+    ]
+    |> option.values
+
+  request.new()
+  |> request.set_method(http.Get)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/tokens")
+  |> request.set_query(query)
 }

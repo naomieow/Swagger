@@ -1,7 +1,5 @@
 pub type Settings {
-  Settings(
-    host: String
-  )
+  Settings(host: String)
 }
 
 pub fn new() -> Settings {
