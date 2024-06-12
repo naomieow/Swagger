@@ -15,6 +15,7 @@ pub type Settings {
 }
 
 /// Defaults the host to `codeberg.org` and everything else as `None`
+/// 
 pub fn new() -> Settings {
   Settings(
     host: "codeberg.org",
@@ -30,22 +31,28 @@ pub fn new() -> Settings {
 }
 
 /// Set the hostname of the swagger `Settings`
+/// 
 pub fn with_hostname(settings: Settings, url host: String) -> Settings {
   Settings(..settings, host: host)
 }
 
 /// Set the username for authentication
+/// 
 pub fn with_username(settings: Settings, username username: String) -> Settings {
   Settings(..settings, username: Some(username))
 }
 
 /// Set the password for authentication
+/// 
 pub fn with_password(settings: Settings, password password: String) -> Settings {
   Settings(..settings, password: Some(password))
 }
 
+/// Use [`with_auth_header_token`](#with_auth_header_token) instead.
+///
 /// Set the access token for authentication - this is in a query
-@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
+/// 
+@deprecated("This authentication option is deprecated for removal in Gitea 1.23.")
 pub fn with_access_token(
   settings: Settings,
   token access_token: String,
@@ -56,6 +63,7 @@ pub fn with_access_token(
 /// Set the auth token for authentication - this is in the header
 /// 
 /// API tokens **must** be prepended with "token" followed by a space.
+/// 
 pub fn with_auth_header_token(
   settings: Settings,
   token authorization_header_token: String,
@@ -67,6 +75,7 @@ pub fn with_auth_header_token(
 }
 
 /// Sudo API request as the user provided as the key. Admin privileges are required.
+/// 
 pub fn with_sudo_header(
   settings: Settings,
   sudo_header sudo_header: String,
@@ -75,6 +84,7 @@ pub fn with_sudo_header(
 }
 
 /// Sudo API request as the user provided as the key. Admin privileges are required.
+/// 
 pub fn with_sudo_param(
   settings: Settings,
   sudo_param sudo_param: String,
@@ -83,6 +93,7 @@ pub fn with_sudo_param(
 }
 
 /// Must be used in combination with BasicAuth (username/password) if two-factor authentication is enabled.
+/// 
 pub fn with_totp_header(
   settings: Settings,
   totp_header totp_header: String,
@@ -90,8 +101,11 @@ pub fn with_totp_header(
   Settings(..settings, totp_header: Some(totp_header))
 }
 
+/// Use [`with_auth_header_token`](#with_auth_header_token) instead.
+///
 /// Set the auth token for authentication - this is in a query
-@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
+/// 
+@deprecated("This authentication option is deprecated for removal in Gitea 1.23.")
 pub fn with_auth_token(settings: Settings, token token: String) -> Settings {
   Settings(..settings, token: Some(token))
 }
