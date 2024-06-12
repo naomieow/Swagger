@@ -69,6 +69,8 @@ fn auth(
   )
 }
 
+/// Gets the authenticated user
+/// 
 pub fn get_authed_user(settings settings: Settings) -> Request(String) {
   let #(query, headers) = auth(settings)
 
@@ -80,6 +82,8 @@ pub fn get_authed_user(settings settings: Settings) -> Request(String) {
   |> with_headers(headers)
 }
 
+/// Gets the authenticated user's actions runner registration token
+/// 
 pub fn get_authed_runner_registration_token(
   settings settings: Settings,
 ) -> Request(String) {
@@ -93,6 +97,8 @@ pub fn get_authed_runner_registration_token(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's OAuth2 applications
+/// 
 pub fn get_authed_oauth2_applications(
   settings settings: Settings,
   page page: Option(Int),
@@ -119,6 +125,8 @@ pub fn get_authed_oauth2_applications(
   |> with_headers(headers)
 }
 
+/// Gets one of the authenticated user's OAuth2 applications by its ID
+/// 
 pub fn get_authed_oauth2_application_by_id(
   settings settings: Settings,
   id id: Int,
@@ -135,6 +143,8 @@ pub fn get_authed_oauth2_application_by_id(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's email addresses
+/// 
 pub fn get_authed_emails(settings settings: Settings) -> Request(String) {
   let #(query, headers) = auth(settings)
 
@@ -146,6 +156,8 @@ pub fn get_authed_emails(settings settings: Settings) -> Request(String) {
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's followers
+/// 
 pub fn get_authed_followers(
   settings settings: Settings,
   page page: Option(Int),
@@ -172,6 +184,8 @@ pub fn get_authed_followers(
   |> with_headers(headers)
 }
 
+/// Gets a list of the users the authenticated user is following
+/// 
 pub fn get_authed_following(
   settings settings: Settings,
   page page: Option(Int),
@@ -198,6 +212,8 @@ pub fn get_authed_following(
   |> with_headers(headers)
 }
 
+/// Checks whether a user is followed by the authenticated user
+/// 
 pub fn get_authed_is_following(
   settings settings: Settings,
   username username: String,
@@ -212,6 +228,8 @@ pub fn get_authed_is_following(
   |> with_headers(headers)
 }
 
+/// Gets a token to verify from the authenticated user
+/// 
 pub fn get_authed_gpg_key_token(settings settings: Settings) -> Request(String) {
   let #(query, headers) = auth(settings)
 
@@ -223,6 +241,8 @@ pub fn get_authed_gpg_key_token(settings settings: Settings) -> Request(String) 
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's GPG keys
+/// 
 pub fn get_authed_gpg_keys(
   settings settings: Settings,
   page page: Option(Int),
@@ -249,6 +269,8 @@ pub fn get_authed_gpg_keys(
   |> with_headers(headers)
 }
 
+/// Gets a specific one of the authenticated user's GPG keys by ID
+///
 pub fn get_authed_gpg_key_by_id(
   settings settings: Settings,
   id id: Int,
@@ -265,6 +287,8 @@ pub fn get_authed_gpg_key_by_id(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's webhooks
+///
 pub fn get_authed_hooks(
   settings settings: Settings,
   page page: Option(Int),
@@ -291,6 +315,8 @@ pub fn get_authed_hooks(
   |> with_headers(headers)
 }
 
+/// Gets a specific one of the authenticated user's webhooks by ID
+///
 pub fn get_authed_hook_by_id(
   settings settings: Settings,
   id id: Int,
@@ -307,6 +333,9 @@ pub fn get_authed_hook_by_id(
   |> with_headers(headers)
 }
 
+
+/// Gets a list of the authenticated user's public keys
+///
 pub fn get_authed_keys(
   settings settings: Settings,
   fingerprint fingerprint: Option(String),
@@ -335,6 +364,8 @@ pub fn get_authed_keys(
   |> with_headers(headers)
 }
 
+/// Gets a specific one of the authenticated user's public keys by ID
+///
 pub fn get_authed_key_by_id(
   settings settings: Settings,
   fingerprint fingerprint: Option(String),
@@ -359,6 +390,8 @@ pub fn get_authed_key_by_id(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's blocked users
+///
 pub fn get_authed_blocked_users(
   settings settings: Settings,
   page page: Option(Int),
@@ -385,6 +418,8 @@ pub fn get_authed_blocked_users(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's repositories
+///
 pub fn get_authed_repositories(
   settings settings: Settings,
   page page: Option(Int),
@@ -411,6 +446,8 @@ pub fn get_authed_repositories(
   |> with_headers(headers)
 }
 
+/// Gets the authenticated user's settings
+/// 
 pub fn get_authed_settings(settings settings: Settings) -> Request(String) {
   let #(query, headers) = auth(settings)
 
@@ -422,6 +459,9 @@ pub fn get_authed_settings(settings settings: Settings) -> Request(String) {
   |> with_headers(headers)
 }
 
+
+/// Gets a list of the authenticated user's starred repositories
+///
 pub fn get_authed_starred(
   settings settings: Settings,
   page page: Option(Int),
@@ -448,6 +488,8 @@ pub fn get_authed_starred(
   |> with_headers(headers)
 }
 
+/// Checks whether a repository is starred by the authenticated user
+/// 
 pub fn get_authed_is_starred(settings settings: Settings, owner owner: String, repo repository: String) -> Request(String) {
   let #(query, headers) = auth(settings)
 
@@ -459,6 +501,8 @@ pub fn get_authed_is_starred(settings settings: Settings, owner owner: String, r
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's stopwatches
+///
 pub fn get_authed_stopwatches(
   settings settings: Settings,
   page page: Option(Int),
@@ -485,6 +529,8 @@ pub fn get_authed_stopwatches(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's subscriptions (watched repositories)
+///
 pub fn get_authed_subscriptions(
   settings settings: Settings,
   page page: Option(Int),
@@ -511,6 +557,8 @@ pub fn get_authed_subscriptions(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's teams that they belong to
+///
 pub fn get_authed_teams(
   settings settings: Settings,
   page page: Option(Int),
@@ -537,6 +585,8 @@ pub fn get_authed_teams(
   |> with_headers(headers)
 }
 
+/// Gets a list of the authenticated user's tracked times
+///
 pub fn get_authed_times(
   settings settings: Settings,
   page page: Option(Int),
@@ -567,6 +617,8 @@ pub fn get_authed_times(
   |> with_headers(headers)
 }
 
+/// Searches for users
+/// 
 pub fn search(
   settings settings: Settings,
   query q: Option(String),
@@ -594,6 +646,8 @@ pub fn search(
   |> request.set_query(query)
 }
 
+/// Gets a specific user
+/// 
 pub fn get_user(
   settings settings: Settings,
   username username: String,
@@ -604,6 +658,8 @@ pub fn get_user(
   |> request.set_path("api/v1/users/" <> username)
 }
 
+/// Gets a list of a user's activity feeds
+/// 
 pub fn get_activity_feeds(
   settings settings: Settings,
   username username: String,
@@ -632,6 +688,8 @@ pub fn get_activity_feeds(
   |> request.set_query(query)
 }
 
+/// Gets a list of a user's followers
+/// 
 pub fn get_followers(
   settings settings: Settings,
   username username: String,
@@ -655,6 +713,8 @@ pub fn get_followers(
   |> request.set_query(query)
 }
 
+/// Gets a list of users the given user is following
+/// 
 pub fn get_following(
   settings settings: Settings,
   username username: String,
@@ -678,6 +738,8 @@ pub fn get_following(
   |> request.set_query(query)
 }
 
+/// Checks whether one user is following another
+/// 
 pub fn get_is_following(
   settings settings: Settings,
   username username: String,
@@ -689,6 +751,8 @@ pub fn get_is_following(
   |> request.set_path("api/v1/users/" <> username <> "/following/" <> target)
 }
 
+/// Gets a list of a user's GPG keys
+/// 
 pub fn get_gpg_keys(
   settings settings: Settings,
   username username: String,
@@ -712,6 +776,8 @@ pub fn get_gpg_keys(
   |> request.set_query(query)
 }
 
+/// Gets a given user's heatmap
+/// 
 pub fn get_heatmap(
   settings settings: Settings,
   username username: String,
@@ -722,6 +788,8 @@ pub fn get_heatmap(
   |> request.set_path("api/v1/users/" <> username <> "/heatmap")
 }
 
+/// Gets a list of a user's public keys
+/// 
 pub fn get_keys(
   settings settings: Settings,
   username username: String,
@@ -747,6 +815,8 @@ pub fn get_keys(
   |> request.set_query(query)
 }
 
+/// Gets a list of a user's repositories
+/// 
 pub fn get_repos(
   settings settings: Settings,
   username username: String,
@@ -770,6 +840,8 @@ pub fn get_repos(
   |> request.set_query(query)
 }
 
+/// Gets a list of a user's starred repositories
+/// 
 pub fn get_starred(
   settings settings: Settings,
   username username: String,
@@ -793,6 +865,8 @@ pub fn get_starred(
   |> request.set_query(query)
 }
 
+/// Gets a list of a user's subscriptions (watched repositories)
+/// 
 pub fn get_subscriptions(
   settings settings: Settings,
   username username: String,
@@ -816,6 +890,8 @@ pub fn get_subscriptions(
   |> request.set_query(query)
 }
 
+/// Gets a list of an authenticated user's access tokens to a given user
+/// 
 pub fn get_tokens(
   settings settings: Settings,
   username username: String,
