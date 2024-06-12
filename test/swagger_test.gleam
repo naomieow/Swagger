@@ -6,9 +6,18 @@ import swagger/settings
 import swagger/user
 
 pub fn main() {
-  let s = settings.new()
+  let s =
+    settings.new()
+    |> settings.with_auth_header_token("token nuh_uh")
+  test_authed_user(s)
   test_get_user(s)
   test_search(s)
+}
+
+fn test_authed_user(s: settings.Settings) {
+  let search = user.get_authed_user(s) |> io.debug
+  use resp <- result.try(httpc.send(search))
+  Ok(resp.body |> user.decode_user_response |> io.debug)
 }
 
 fn test_search(s: settings.Settings) {
@@ -20,5 +29,5 @@ fn test_search(s: settings.Settings) {
 fn test_get_user(s: settings.Settings) {
   let u = user.get_user(s, "naomi") |> io.debug
   use resp <- result.try(httpc.send(u))
-  Ok(resp.body |> io.debug)
+  Ok(resp.body |> user.decode_user_response |> io.debug)
 }

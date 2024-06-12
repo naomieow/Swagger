@@ -6,17 +6,11 @@ pub type Settings {
     username: Option(String),
     password: Option(String),
     access_token: Option(String),
-    // access_token in query
     authorization_header_token: Option(String),
-    // Authorization in header
     sudo_header: Option(String),
-    // Sudo in header
     sudo_param: Option(String),
-    // sudo in query
     totp_header: Option(String),
-    // X-FORGEJO-OTP in header
     token: Option(String),
-    // token in query
   )
 }
 
@@ -50,36 +44,54 @@ pub fn with_password(settings: Settings, password password: String) -> Settings 
   Settings(..settings, password: Some(password))
 }
 
-@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
 /// Set the access token for authentication - this is in a query
-pub fn with_access_token(settings: Settings, token access_token: String) -> Settings {
+@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
+pub fn with_access_token(
+  settings: Settings,
+  token access_token: String,
+) -> Settings {
   Settings(..settings, access_token: Some(access_token))
 }
 
 /// Set the auth token for authentication - this is in the header
 /// 
 /// API tokens **must** be prepended with "token" followed by a space.
-pub fn with_auth_header_token(settings: Settings, token authorization_header_token: String) -> Settings {
-  Settings(..settings, authorization_header_token: Some(authorization_header_token))
+pub fn with_auth_header_token(
+  settings: Settings,
+  token authorization_header_token: String,
+) -> Settings {
+  Settings(
+    ..settings,
+    authorization_header_token: Some(authorization_header_token),
+  )
 }
 
 /// Sudo API request as the user provided as the key. Admin privileges are required.
-pub fn with_sudo_header(settings: Settings, sudo_header sudo_header: String) -> Settings {
+pub fn with_sudo_header(
+  settings: Settings,
+  sudo_header sudo_header: String,
+) -> Settings {
   Settings(..settings, sudo_header: Some(sudo_header))
 }
 
 /// Sudo API request as the user provided as the key. Admin privileges are required.
-pub fn with_sudo_param(settings: Settings, sudo_param sudo_param: String) -> Settings {
+pub fn with_sudo_param(
+  settings: Settings,
+  sudo_param sudo_param: String,
+) -> Settings {
   Settings(..settings, sudo_param: Some(sudo_param))
 }
 
 /// Must be used in combination with BasicAuth (username/password) if two-factor authentication is enabled.
-pub fn with_totp_header(settings: Settings, totp_header totp_header: String) -> Settings {
+pub fn with_totp_header(
+  settings: Settings,
+  totp_header totp_header: String,
+) -> Settings {
   Settings(..settings, totp_header: Some(totp_header))
 }
 
-@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
 /// Set the auth token for authentication - this is in a query
+@deprecated("This authentication option is deprecated for removal in Gitea 1.23. use `with_auth_header_token` instead.")
 pub fn with_auth_token(settings: Settings, token token: String) -> Settings {
   Settings(..settings, token: Some(token))
 }
