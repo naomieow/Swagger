@@ -333,7 +333,6 @@ pub fn get_authed_hook_by_id(
   |> with_headers(headers)
 }
 
-
 /// Gets a list of the authenticated user's public keys
 ///
 pub fn get_authed_keys(
@@ -459,7 +458,6 @@ pub fn get_authed_settings(settings settings: Settings) -> Request(String) {
   |> with_headers(headers)
 }
 
-
 /// Gets a list of the authenticated user's starred repositories
 ///
 pub fn get_authed_starred(
@@ -490,7 +488,11 @@ pub fn get_authed_starred(
 
 /// Checks whether a repository is starred by the authenticated user
 /// 
-pub fn get_authed_is_starred(settings settings: Settings, owner owner: String, repo repository: String) -> Request(String) {
+pub fn get_authed_is_starred(
+  settings settings: Settings,
+  owner owner: String,
+  repo repository: String,
+) -> Request(String) {
   let #(query, headers) = auth(settings)
 
   request.new()
