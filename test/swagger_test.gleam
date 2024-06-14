@@ -1,7 +1,7 @@
 import gleam/httpc
-import gleam/io
 import gleam/option.{None, Some}
 import gleam/result
+import pprint
 import swagger/settings
 import swagger/user
 
@@ -15,19 +15,19 @@ pub fn main() {
 }
 
 fn test_authed_user(s: settings.Settings) {
-  let search = user.get_authed_user(s) |> io.debug
+  let search = user.get_authed_user(s) |> pprint.debug
   use resp <- result.try(httpc.send(search))
-  Ok(resp.body |> user.decode_user_response |> io.debug)
+  Ok(resp.body |> user.decode_user_response |> pprint.debug)
 }
 
 fn test_search(s: settings.Settings) {
-  let search = user.search(s, Some("naomi"), None, None, None) |> io.debug
+  let search = user.search(s, Some("naomi"), None, None, None) |> pprint.debug
   use resp <- result.try(httpc.send(search))
-  Ok(resp.body |> io.debug)
+  Ok(resp.body |> pprint.debug)
 }
 
 fn test_get_user(s: settings.Settings) {
-  let u = user.get_user(s, "naomi") |> io.debug
+  let u = user.get_user(s, "naomi") |> pprint.debug
   use resp <- result.try(httpc.send(u))
-  Ok(resp.body |> user.decode_user_response |> io.debug)
+  Ok(resp.body |> user.decode_user_response |> pprint.debug)
 }

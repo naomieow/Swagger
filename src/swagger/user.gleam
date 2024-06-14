@@ -917,6 +917,805 @@ pub fn get_tokens(
   |> request.set_query(query)
 }
 
+/// Creates or Updates the specified secret for the authenticated user
+///
+pub fn create_or_update_secret(
+  settings settings: Settings,
+  name secret_name: String,
+  data secret_data: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/actions/secrets/" <> secret_name)
+  |> request.set_body("{\"data\":\"" <> secret_data <> " \"}")
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes the specified secret for the authenticated user
+/// 
+pub fn delete_secret(
+  settings settings: Settings,
+  name secret_name: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/actions/secrets/" <> secret_name)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+fn create_oauth2_body(
+  confidential_client confidential: Bool,
+  name name: String,
+  redirect_uris uris: List(String),
+) -> String {
+  "{\"confidential_client\":"
+  <> bool.to_string(confidential) |> string.lowercase
+  <> ","
+  <> "\"name\":\""
+  <> name
+  <> "\","
+  <> "\"redirect_uris\":["
+  <> uris |> list.map(fn(uri) { "\"" <> uri <> "\"" }) |> string.join(",")
+  <> "]}"
+}
+
+/// Creates a new oauth2 application for the authenticated user
+/// 
+pub fn create_new_oauth2_application(
+  settings settings: Settings,
+  confidential_client confidential: Bool,
+  name name: String,
+  redirect_uris uris: List(String),
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/applications/oauth2")
+  |> request.set_body(create_oauth2_body(confidential, name, uris))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes the specified oauth2 application for the authenticated user
+/// 
+pub fn delete_oauth2_application_by_id(
+  settings settings: Settings,
+  id id: Int,
+) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/applications/oauth2/" <> id)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Updates the specified oauth2 application for the authenticated user
+/// 
+pub fn update_oauth2_application(
+  settings settings: Settings,
+  id id: Int,
+  confidential_client confidential: Bool,
+  name name: String,
+  redirect_uris uris: List(String),
+) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Patch)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/applications/oauth2/" <> id)
+  |> request.set_body(create_oauth2_body(confidential, name, uris))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Updates the authenticated user's avatar.
+/// 
+/// Image must be base64 encoded
+/// 
+pub fn update_avatar(
+  settings settings: Settings,
+  image image: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/avatar")
+  |> request.set_body("{\"image\":\"" <> image <> "\"}")
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes the authenticated user's avatar.
+/// 
+pub fn delete_avatar(settings settings: Settings) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/avatar")
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Blocks the specified user from the authenticated user
+/// 
+pub fn block_user(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/block/" <> username)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Adds email addresses to the authenticated user
+/// 
+pub fn add_emails(
+  settings settings: Settings,
+  emails emails: List(String),
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/emails")
+  |> request.set_body(
+    "{\"emails\":["
+    <> emails |> list.map(fn(uri) { "\"" <> uri <> "\"" }) |> string.join(",")
+    <> "]}",
+  )
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes email addresses to the authenticated user
+/// 
+pub fn delete_emails(
+  settings settings: Settings,
+  emails emails: List(String),
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/emails")
+  |> request.set_body(
+    "{\"emails\":["
+    <> emails |> list.map(fn(uri) { "\"" <> uri <> "\"" }) |> string.join(",")
+    <> "]}",
+  )
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Follows the specified user from the authenticated user
+/// 
+pub fn follow_user(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/following/" <> username)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Unfollows the specified user from the authenticated user
+/// 
+pub fn unfollow_user(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/following/" <> username)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Verifies a GPG key for the authenticated user
+/// 
+pub fn verify_gpg_key(settings settings: Settings) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/gpg_key_verify")
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Creates a GPG key for the authenticated user
+/// 
+pub fn create_gpg_key(
+  settings settings: Settings,
+  armored_public_key armoured_public_key: String,
+  armored_signature armoured_signature: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/gpg_keys")
+  |> request.set_body(
+    "{\"armored_public_key\":\""
+    <> armoured_public_key
+    <> "\",\"armored_signature\":\""
+    <> armoured_signature
+    <> "\"}",
+  )
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Removed a specified GPG key for the authenticated user
+/// 
+pub fn remove_gpg_key(
+  settings settings: Settings,
+  id id: Int,
+) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/gpg_keys/" <> id)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+pub type HookType {
+  Forgejo
+  Dingtalk
+  Discord
+  Gitea
+  Gogs
+  MSTeams
+  Slack
+  Telegram
+  Feishu
+  WeChatWork
+  Packagist
+}
+
+fn hook_to_string(hook_type: HookType) -> String {
+  case hook_type {
+    Forgejo -> "forgejo"
+    Dingtalk -> "dingtalk"
+    Discord -> "discord"
+    Gitea -> "gitea"
+    Gogs -> "gogs"
+    MSTeams -> "msteams"
+    Slack -> "slack"
+    Telegram -> "telegram"
+    Feishu -> "feishu"
+    WeChatWork -> "wechatwork"
+    Packagist -> "packagist"
+  }
+}
+
+fn create_hook_body(
+  active active: Bool,
+  authorization_header authorization_header: String,
+  branch_filter branch_filter: String,
+  config config: List(#(String, String)),
+  events events: List(String),
+  hook_type hook_type: HookType,
+) -> String {
+  "{\"active\":"
+  <> bool.to_string(active) |> string.lowercase
+  <> ","
+  <> "\"authorization_header\":\""
+  <> authorization_header
+  <> "\","
+  <> "\"branch_filter\":\""
+  <> branch_filter
+  <> "\","
+  <> "\"config\":{"
+  <> config
+  |> list.map(fn(prop) { "\"" <> prop.0 <> "\":" <> "\"" <> prop.1 <> "\"" })
+  |> string.join(",")
+  <> "},"
+  <> "\"events\":["
+  <> events |> list.map(fn(event) { "\"" <> event <> "\"" }) |> string.join(",")
+  <> "],"
+  <> "\"type\":\""
+  <> hook_type |> hook_to_string
+  <> "\""
+  <> "}"
+}
+
+fn create_hook_body_no_type(
+  active active: Bool,
+  authorization_header authorization_header: String,
+  branch_filter branch_filter: String,
+  config config: List(#(String, String)),
+  events events: List(String),
+) -> String {
+  "{\"active\":"
+  <> bool.to_string(active) |> string.lowercase
+  <> ","
+  <> "\"authorization_header\":\""
+  <> authorization_header
+  <> "\","
+  <> "\"branch_filter\":\""
+  <> branch_filter
+  <> "\","
+  <> "\"config\":{"
+  <> config
+  |> list.map(fn(prop) { "\"" <> prop.0 <> "\":" <> "\"" <> prop.1 <> "\"" })
+  |> string.join(",")
+  <> "},"
+  <> "\"events\":["
+  <> events |> list.map(fn(event) { "\"" <> event <> "\"" }) |> string.join(",")
+  <> "],"
+  <> "}"
+}
+
+/// Creates a webhook for the authenticated user
+/// 
+pub fn create_hook(
+  settings settings: Settings,
+  active active: Bool,
+  authorization_header auth_header: String,
+  branch_filter filter: String,
+  config config: List(#(String, String)),
+  events events: List(String),
+  hook_type hook_type: HookType,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/hooks")
+  |> request.set_body(create_hook_body(
+    active,
+    auth_header,
+    filter,
+    config,
+    events,
+    hook_type,
+  ))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes a specified webhook for the authenticated user
+/// 
+pub fn delete_webhook(
+  settings settings: Settings,
+  id id: Int,
+) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/hooks/" <> id)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Updates a webhook for the authenticated user
+/// 
+pub fn update_hook(
+  settings settings: Settings,
+  id id: Int,
+  active active: Bool,
+  authorization_header auth_header: String,
+  branch_filter filter: String,
+  config config: List(#(String, String)),
+  events events: List(String),
+) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Patch)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/hooks/" <> id)
+  |> request.set_body(create_hook_body_no_type(
+    active,
+    auth_header,
+    filter,
+    config,
+    events,
+  ))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Creates a public key for the authenticated user
+/// 
+pub fn create_key(
+  settings settings: Settings,
+  key key: String,
+  read_only read_only: Bool,
+  title title: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/keys")
+  |> request.set_body(
+    "{\"key\":\""
+    <> key
+    <> "\","
+    <> "\"read_only\":"
+    <> bool.to_string(read_only) |> string.lowercase
+    <> ","
+    <> "\"title\":\""
+    <> title
+    <> "\","
+    <> "}",
+  )
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes a public key for the authenticated user
+/// 
+pub fn delete_key(settings settings: Settings, id id: Int) -> Request(String) {
+  let id = id |> int.to_string
+
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/keys/" <> id)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+pub type ObjectFormatName {
+  Sha1
+  Sha256
+}
+
+fn ofn_to_string(ofn: ObjectFormatName) -> String {
+  case ofn {
+    Sha1 -> "sha1"
+    Sha256 -> "sha256"
+  }
+}
+
+pub type TrustModel {
+  Default
+  Collaborator
+  Comitter
+  CollaboratorCommitter
+}
+
+fn tm_to_string(tm: TrustModel) -> String {
+  case tm {
+    Default -> "default"
+    Collaborator -> "collaborator"
+    Comitter -> "comitter"
+    CollaboratorCommitter -> "collaboratorcomitter"
+  }
+}
+
+fn create_repo_body(
+  auto_init auto_init: Bool,
+  default_branch default_branch: String,
+  description description: String,
+  gitignores gitignores: String,
+  issue_labels issue_labels: String,
+  license license: String,
+  name name: String,
+  object_format_name object_format_name: ObjectFormatName,
+  private private: Bool,
+  readme readme: String,
+  template template: Bool,
+  trust_model trust_model: TrustModel,
+) -> String {
+  "{\"auto_init\":"
+  <> bool.to_string(auto_init) |> string.lowercase
+  <> ","
+  <> "\"default_branch\":\""
+  <> default_branch
+  <> "\","
+  <> "\"description\":\""
+  <> description
+  <> "\","
+  <> "\"gitignores\":\""
+  <> gitignores
+  <> "\","
+  <> "\"issue_labels\":\""
+  <> issue_labels
+  <> "\","
+  <> "\"license\":\""
+  <> license
+  <> "\","
+  <> "\"name\":\""
+  <> name
+  <> "\","
+  <> "\"object_format_name\":\""
+  <> object_format_name |> ofn_to_string
+  <> "\","
+  <> "\"private\":"
+  <> bool.to_string(private) |> string.lowercase
+  <> ","
+  <> "\"readme\":\""
+  <> readme
+  <> "\","
+  <> "\"template\":"
+  <> bool.to_string(template) |> string.lowercase
+  <> ","
+  <> "\"trust_model\":\""
+  <> trust_model |> tm_to_string
+  <> "\""
+  <> "}"
+}
+
+/// Creates a repository for the authenticated user
+/// 
+pub fn create_repo(
+  settings settings: Settings,
+  auto_init auto_init: Bool,
+  default_branch default_branch: String,
+  description description: String,
+  gitignores gitignores: String,
+  issue_labels issue_labels: String,
+  license license: String,
+  name name: String,
+  object_format_name object_format_name: ObjectFormatName,
+  private private: Bool,
+  readme readme: String,
+  template template: Bool,
+  trust_model trust_model: TrustModel,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Patch)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/repos")
+  |> request.set_body(create_repo_body(
+    auto_init,
+    default_branch,
+    description,
+    gitignores,
+    issue_labels,
+    license,
+    name,
+    object_format_name,
+    private,
+    readme,
+    template,
+    trust_model,
+  ))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+fn create_settings_body(
+  description description: String,
+  diff_view_style diff_view_style: String,
+  enable_repo_unit_hints repo_hints: Bool,
+  full_name full_name: String,
+  hide_activity hide_activity: Bool,
+  hide_email hide_email: Bool,
+  language language: String,
+  location location: String,
+  pronouns pronouns: String,
+  theme theme: String,
+  website website: String,
+) -> String {
+  "{\"description\":\""
+  <> description
+  <> "\","
+  <> "\"diff_view_style\":\""
+  <> diff_view_style
+  <> "\","
+  <> "\"enable_repo_unit_hints\":"
+  <> bool.to_string(repo_hints) |> string.lowercase
+  <> ","
+  <> "\"full_name\":\""
+  <> full_name
+  <> "\","
+  <> "\"hide_activity\":"
+  <> bool.to_string(hide_activity) |> string.lowercase
+  <> ","
+  <> "\"hide_email\":"
+  <> bool.to_string(hide_email) |> string.lowercase
+  <> ","
+  <> "\"language\":\""
+  <> language
+  <> "\","
+  <> "\"location\":\""
+  <> location
+  <> "\","
+  <> "\"pronouns\":\""
+  <> pronouns
+  <> "\","
+  <> "\"theme\":\""
+  <> theme
+  <> "\","
+  <> "\"website\":\""
+  <> website
+  <> "}"
+}
+
+/// Updates the authenticated user's settings
+/// 
+pub fn update_settings(
+  settings settings: Settings,
+  description description: String,
+  diff_view_style diff_view_style: String,
+  enable_repo_unit_hints repo_hints: Bool,
+  full_name full_name: String,
+  hide_activity hide_activity: Bool,
+  hide_email hide_email: Bool,
+  language language: String,
+  location location: String,
+  pronouns pronouns: String,
+  theme theme: String,
+  website website: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Patch)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/settings")
+  |> request.set_body(create_settings_body(
+    description,
+    diff_view_style,
+    repo_hints,
+    full_name,
+    hide_activity,
+    hide_email,
+    language,
+    location,
+    pronouns,
+    theme,
+    website,
+  ))
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Stars the given repo as the authenticated user
+/// 
+pub fn star_repository(
+  settings settings: Settings,
+  owner owner: String,
+  repo repo: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/starred/" <> owner <> "/" <> repo)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Unstars the given repo as the authenticated user
+/// 
+pub fn unstar_repository(
+  settings settings: Settings,
+  owner owner: String,
+  repo repo: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/starred/" <> owner <> "/" <> repo)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+
+/// Unblocks the given user from the authenticated user
+/// 
+pub fn unblock_user(
+  settings settings: Settings,
+  username username: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Put)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/user/unblock/" <> username)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Creates an access token for a given user
+/// 
+pub fn create_access_token(
+  settings settings: Settings,
+  username username: String,
+  token_name name: String,
+  scopes scopes: List(String),
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Post)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/tokens")
+  |> request.set_body(
+    "{\"name\": \"" 
+    <> name 
+    <> "\",
+    \"\": [" 
+    <> scopes |> list.map(fn(scope) { "\"" <> scope <> "\"" }) |> string.join(",") 
+    <> "]}"
+  )
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
+/// Deletes an access token for a given user
+/// 
+pub fn delete_access_token(
+  settings settings: Settings,
+  username username: String,
+  token token: String,
+) -> Request(String) {
+  let #(query, headers) = auth(settings)
+
+  request.new()
+  |> request.set_method(http.Delete)
+  |> request.set_host(settings.host)
+  |> request.set_path("api/v1/users/" <> username <> "/tokens/" <> token)
+  |> request.set_query(query)
+  |> with_headers(headers)
+}
+
 pub fn decode_user_response(
   json_string: String,
 ) -> Result(User, json.DecodeError) {
