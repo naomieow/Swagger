@@ -3,6 +3,9 @@ import gleam/http
 import gleam/http/request.{type Request}
 import swagger/internal/utils
 import gleam/int
+import gleam/dynamic.{field, string}
+import swagger/models.{type ActivityPub, ActivityPub}
+import gleam/json
 
 /// Returns the person actor for a user
 /// 
@@ -17,6 +20,14 @@ pub fn get_person(settings settings: swagger.Settings, user_id user_id: Int) -> 
   |> request.set_path("api/v1/activitypub/user-id/" <> user_id)
   |> request.set_query(query)
   |> utils.with_headers(headers)
+}
+
+pub fn decode_get_person(json_string json_string: String) -> Result(ActivityPub, json.DecodeError) {
+  let decoder = dynamic.decode1(
+    ActivityPub,
+    field("@context", string),
+  )
+  json.decode(json_string, decoder)
 }
 
 /// Send to the inbox
