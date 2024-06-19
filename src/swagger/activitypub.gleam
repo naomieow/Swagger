@@ -27,7 +27,7 @@ pub fn send_to_inbox(settings settings: swagger.Settings, user_id user_id: Int) 
   let #(query, headers) = utils.auth(settings)
 
   request.new()
-  |> request.set_method(http.Get)
+  |> request.set_method(http.Post)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/activitypub/user-id/" <> user_id <> "/inbox")
   |> request.set_query(query)
