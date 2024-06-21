@@ -6,17 +6,15 @@ jobs:
     steps:
       - name: 🚚 Checkout
         uses: actions/checkout@v4
-        with:
-          repository: "https://codeberg.org/naomi/Swagger"
       - name: ⭐ Install Gleam
-        uses: naomi/Swagger/.forgejo/actions/install_gleam@main
+        uses: https://codeberg.org/naomi/Swagger/.forgejo/actions/install_gleam@main
         with:
           gleam_version: 1.2.1
           erlang_version: 27
       - name: 💄 Format Code
-        uses: naomi/Swagger/.forgejo/actions/format@main
+        uses: https://codeberg.org/naomi/Swagger/.forgejo/actions/format@main
       - name: 🚀 Run Tests
-        uses: naomi/Swagger/.forgejo/actions/test@main
+        uses: https://codeberg.org/naomi/Swagger/.forgejo/actions/test@main
         with:
           target: "erlang"
 
