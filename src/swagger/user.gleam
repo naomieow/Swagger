@@ -1,85 +1,24 @@
 import gleam/bool
-import gleam/dynamic.{bool, field, int, string}
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/int
-import gleam/json
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option, Some}
 import gleam/string
-import swagger/internal/decoders
-import swagger/settings.{type Settings}
-
-pub type User {
-  User(
-    active: Bool,
-    avatar_url: String,
-    created: String,
-    description: String,
-    email: String,
-    followers_count: Int,
-    following_count: Int,
-    full_name: String,
-    id: Int,
-    is_admin: Bool,
-    language: String,
-    last_login: String,
-    // date-time
-    location: String,
-    login: String,
-    login_name: String,
-    prohibit_login: Bool,
-    pronouns: String,
-    restricted: Bool,
-    starred_repos_count: Int,
-    visibility: String,
-    website: String,
-  )
-}
-
-fn with_headers(
-  req: Request(String),
-  headers: List(#(String, String)),
-) -> Request(String) {
-  let req =
-    headers
-    |> list.map_fold(from: req, with: fn(req, header) {
-      #(req |> request.set_header(header.0, header.1), header)
-    })
-  req.0
-}
-
-fn auth(
-  settings: Settings,
-) -> #(List(#(String, String)), List(#(String, String))) {
-  #(
-    [
-      settings.access_token |> option.map(fn(x) { #("access_token", x) }),
-      settings.sudo_param |> option.map(fn(x) { #("sudo", x) }),
-      settings.token |> option.map(fn(x) { #("token", x) }),
-    ]
-      |> option.values,
-    [
-      settings.authorization_header_token
-        |> option.map(fn(x) { #("authorization", x) }),
-      settings.sudo_header |> option.map(fn(x) { #("sudo", x) }),
-      settings.totp_header |> option.map(fn(x) { #("x-forgejo-otp", x) }),
-    ]
-      |> option.values,
-  )
-}
+import swagger.{type Settings}
+import swagger/internal/utils
 
 /// Gets the authenticated user
 /// 
 pub fn get_authed_user(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets the authenticated user's actions runner registration token
@@ -87,14 +26,14 @@ pub fn get_authed_user(settings settings: Settings) -> Request(String) {
 pub fn get_authed_runner_registration_token(
   settings settings: Settings,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/actions/runners/registration-token")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's OAuth2 applications
@@ -107,7 +46,7 @@ pub fn get_authed_oauth2_applications(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -122,7 +61,7 @@ pub fn get_authed_oauth2_applications(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/applications/oauth2")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets one of the authenticated user's OAuth2 applications by its ID
@@ -133,27 +72,27 @@ pub fn get_authed_oauth2_application_by_id(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/applications/oauth2/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's email addresses
 /// 
 pub fn get_authed_emails(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/emails")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's followers
@@ -166,7 +105,7 @@ pub fn get_authed_followers(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -181,7 +120,7 @@ pub fn get_authed_followers(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/followers")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the users the authenticated user is following
@@ -194,7 +133,7 @@ pub fn get_authed_following(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -209,7 +148,7 @@ pub fn get_authed_following(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/following")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Checks whether a user is followed by the authenticated user
@@ -218,27 +157,27 @@ pub fn get_authed_is_following(
   settings settings: Settings,
   username username: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/following/" <> username)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a token to verify from the authenticated user
 /// 
 pub fn get_authed_gpg_key_token(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/gpg_key_token")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's GPG keys
@@ -251,7 +190,7 @@ pub fn get_authed_gpg_keys(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -266,7 +205,7 @@ pub fn get_authed_gpg_keys(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/gpg_keys")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a specific one of the authenticated user's GPG keys by ID
@@ -277,14 +216,14 @@ pub fn get_authed_gpg_key_by_id(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/gpg_keys/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's webhooks
@@ -297,7 +236,7 @@ pub fn get_authed_hooks(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -312,7 +251,7 @@ pub fn get_authed_hooks(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/hooks")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a specific one of the authenticated user's webhooks by ID
@@ -323,14 +262,14 @@ pub fn get_authed_hook_by_id(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/hooks/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's public keys
@@ -344,7 +283,7 @@ pub fn get_authed_keys(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       fingerprint |> option.map(fn(x) { #("fingerprint", x) }),
@@ -360,7 +299,7 @@ pub fn get_authed_keys(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/keys")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a specific one of the authenticated user's public keys by ID
@@ -372,7 +311,7 @@ pub fn get_authed_key_by_id(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       fingerprint |> option.map(fn(x) { #("fingerprint", x) }),
@@ -386,7 +325,7 @@ pub fn get_authed_key_by_id(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/keys/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's blocked users
@@ -399,7 +338,7 @@ pub fn get_authed_blocked_users(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -414,7 +353,7 @@ pub fn get_authed_blocked_users(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/list_blocked")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's repositories
@@ -427,7 +366,7 @@ pub fn get_authed_repositories(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -442,20 +381,20 @@ pub fn get_authed_repositories(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/repos")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets the authenticated user's settings
 /// 
 pub fn get_authed_settings(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/settings")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's starred repositories
@@ -468,7 +407,7 @@ pub fn get_authed_starred(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -483,7 +422,7 @@ pub fn get_authed_starred(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/starred")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Checks whether a repository is starred by the authenticated user
@@ -493,14 +432,14 @@ pub fn get_authed_is_starred(
   owner owner: String,
   repo repository: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Get)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/starred/" <> owner <> "/" <> repository)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's stopwatches
@@ -513,7 +452,7 @@ pub fn get_authed_stopwatches(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -528,7 +467,7 @@ pub fn get_authed_stopwatches(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/stopwatches")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's subscriptions (watched repositories)
@@ -541,7 +480,7 @@ pub fn get_authed_subscriptions(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -556,7 +495,7 @@ pub fn get_authed_subscriptions(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/subscriptions")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's teams that they belong to
@@ -569,7 +508,7 @@ pub fn get_authed_teams(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -584,7 +523,7 @@ pub fn get_authed_teams(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/teams")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Gets a list of the authenticated user's tracked times
@@ -599,7 +538,7 @@ pub fn get_authed_times(
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
   let query =
     [
       page |> option.map(fn(x) { #("page", x) }),
@@ -616,7 +555,7 @@ pub fn get_authed_times(
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/teams")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Searches for users
@@ -924,7 +863,7 @@ pub fn create_or_update_secret(
   name secret_name: String,
   data secret_data: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
@@ -932,7 +871,7 @@ pub fn create_or_update_secret(
   |> request.set_path("api/v1/user/actions/secrets/" <> secret_name)
   |> request.set_body("{\"data\":\"" <> secret_data <> " \"}")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes the specified secret for the authenticated user
@@ -941,14 +880,14 @@ pub fn delete_secret(
   settings settings: Settings,
   name secret_name: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/actions/secrets/" <> secret_name)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 fn create_oauth2_body(
@@ -975,7 +914,7 @@ pub fn create_new_oauth2_application(
   name name: String,
   redirect_uris uris: List(String),
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
@@ -983,7 +922,7 @@ pub fn create_new_oauth2_application(
   |> request.set_path("api/v1/user/applications/oauth2")
   |> request.set_body(create_oauth2_body(confidential, name, uris))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes the specified oauth2 application for the authenticated user
@@ -994,14 +933,14 @@ pub fn delete_oauth2_application_by_id(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/applications/oauth2/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Updates the specified oauth2 application for the authenticated user
@@ -1015,7 +954,7 @@ pub fn update_oauth2_application(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Patch)
@@ -1023,7 +962,7 @@ pub fn update_oauth2_application(
   |> request.set_path("api/v1/user/applications/oauth2/" <> id)
   |> request.set_body(create_oauth2_body(confidential, name, uris))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Updates the authenticated user's avatar.
@@ -1034,7 +973,7 @@ pub fn update_avatar(
   settings settings: Settings,
   image image: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
@@ -1042,20 +981,20 @@ pub fn update_avatar(
   |> request.set_path("api/v1/user/avatar")
   |> request.set_body("{\"image\":\"" <> image <> "\"}")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes the authenticated user's avatar.
 /// 
 pub fn delete_avatar(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/avatar")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Blocks the specified user from the authenticated user
@@ -1064,14 +1003,14 @@ pub fn block_user(
   settings settings: Settings,
   username username: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/block/" <> username)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Adds email addresses to the authenticated user
@@ -1080,7 +1019,7 @@ pub fn add_emails(
   settings settings: Settings,
   emails emails: List(String),
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
@@ -1092,7 +1031,7 @@ pub fn add_emails(
     <> "]}",
   )
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes email addresses to the authenticated user
@@ -1101,7 +1040,7 @@ pub fn delete_emails(
   settings settings: Settings,
   emails emails: List(String),
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
@@ -1113,7 +1052,7 @@ pub fn delete_emails(
     <> "]}",
   )
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Follows the specified user from the authenticated user
@@ -1122,14 +1061,14 @@ pub fn follow_user(
   settings settings: Settings,
   username username: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/following/" <> username)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Unfollows the specified user from the authenticated user
@@ -1138,27 +1077,27 @@ pub fn unfollow_user(
   settings settings: Settings,
   username username: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/following/" <> username)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Verifies a GPG key for the authenticated user
 /// 
 pub fn verify_gpg_key(settings settings: Settings) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/gpg_key_verify")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Creates a GPG key for the authenticated user
@@ -1168,7 +1107,7 @@ pub fn create_gpg_key(
   armored_public_key armoured_public_key: String,
   armored_signature armoured_signature: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
@@ -1182,7 +1121,7 @@ pub fn create_gpg_key(
     <> "\"}",
   )
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Removed a specified GPG key for the authenticated user
@@ -1193,14 +1132,14 @@ pub fn remove_gpg_key(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/gpg_keys/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 pub type HookType {
@@ -1302,7 +1241,7 @@ pub fn create_hook(
   events events: List(String),
   hook_type hook_type: HookType,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
@@ -1317,7 +1256,7 @@ pub fn create_hook(
     hook_type,
   ))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes a specified webhook for the authenticated user
@@ -1328,14 +1267,14 @@ pub fn delete_webhook(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/hooks/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Updates a webhook for the authenticated user
@@ -1351,7 +1290,7 @@ pub fn update_hook(
 ) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Patch)
@@ -1365,7 +1304,7 @@ pub fn update_hook(
     events,
   ))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Creates a public key for the authenticated user
@@ -1376,7 +1315,7 @@ pub fn create_key(
   read_only read_only: Bool,
   title title: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
@@ -1395,7 +1334,7 @@ pub fn create_key(
     <> "}",
   )
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes a public key for the authenticated user
@@ -1403,14 +1342,14 @@ pub fn create_key(
 pub fn delete_key(settings settings: Settings, id id: Int) -> Request(String) {
   let id = id |> int.to_string
 
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/keys/" <> id)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 pub type ObjectFormatName {
@@ -1511,7 +1450,7 @@ pub fn create_repo(
   template template: Bool,
   trust_model trust_model: TrustModel,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Patch)
@@ -1532,7 +1471,7 @@ pub fn create_repo(
     trust_model,
   ))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 fn create_settings_body(
@@ -1599,7 +1538,7 @@ pub fn update_settings(
   theme theme: String,
   website website: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Patch)
@@ -1619,7 +1558,7 @@ pub fn update_settings(
     website,
   ))
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Stars the given repo as the authenticated user
@@ -1629,14 +1568,14 @@ pub fn star_repository(
   owner owner: String,
   repo repo: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/starred/" <> owner <> "/" <> repo)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Unstars the given repo as the authenticated user
@@ -1646,16 +1585,15 @@ pub fn unstar_repository(
   owner owner: String,
   repo repo: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/starred/" <> owner <> "/" <> repo)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
-
 
 /// Unblocks the given user from the authenticated user
 /// 
@@ -1663,14 +1601,14 @@ pub fn unblock_user(
   settings settings: Settings,
   username username: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Put)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/user/unblock/" <> username)
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Creates an access token for a given user
@@ -1681,22 +1619,18 @@ pub fn create_access_token(
   token_name name: String,
   scopes scopes: List(String),
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Post)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/users/" <> username <> "/tokens")
-  |> request.set_body(
-    "{\"name\": \"" 
-    <> name 
-    <> "\",
-    \"\": [" 
-    <> scopes |> list.map(fn(scope) { "\"" <> scope <> "\"" }) |> string.join(",") 
-    <> "]}"
-  )
+  |> request.set_body("{\"name\": \"" <> name <> "\",
+    \"\": [" <> scopes
+  |> list.map(fn(scope) { "\"" <> scope <> "\"" })
+  |> string.join(",") <> "]}")
   |> request.set_query(query)
-  |> with_headers(headers)
+  |> utils.with_headers(headers)
 }
 
 /// Deletes an access token for a given user
@@ -1706,43 +1640,12 @@ pub fn delete_access_token(
   username username: String,
   token token: String,
 ) -> Request(String) {
-  let #(query, headers) = auth(settings)
+  let #(query, headers) = utils.auth(settings)
 
   request.new()
   |> request.set_method(http.Delete)
   |> request.set_host(settings.host)
   |> request.set_path("api/v1/users/" <> username <> "/tokens/" <> token)
   |> request.set_query(query)
-  |> with_headers(headers)
-}
-
-pub fn decode_user_response(
-  json_string: String,
-) -> Result(User, json.DecodeError) {
-  let decoder =
-    decoders.decode21(
-      User,
-      field("active", bool),
-      field("avatar_url", string),
-      field("created", string),
-      field("description", string),
-      field("email", string),
-      field("followers_count", int),
-      field("following_count", int),
-      field("full_name", string),
-      field("id", int),
-      field("is_admin", bool),
-      field("language", string),
-      field("last_login", string),
-      field("location", string),
-      field("login", string),
-      field("login_name", string),
-      field("prohibit_login", bool),
-      field("pronouns", string),
-      field("restricted", bool),
-      field("starred_repos_count", int),
-      field("visibility", string),
-      field("website", string),
-    )
-  json.decode(from: json_string, using: decoder)
+  |> utils.with_headers(headers)
 }
