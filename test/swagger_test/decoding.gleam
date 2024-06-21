@@ -87,9 +87,7 @@ pub fn decoding_tests() {
         |> models.decode_user
         |> expect.to_equal(
           Error(
-            UnexpectedFormat([
-              DecodeError("field", "nothing", ["last_login"]),
-            ]),
+            UnexpectedFormat([DecodeError("field", "nothing", ["last_login"])]),
           ),
         )
       }),
@@ -121,9 +119,7 @@ pub fn decoding_tests() {
         |> models.decode_user
         |> expect.to_equal(
           Error(
-            UnexpectedFormat([
-              DecodeError("Int", "String", ["followers_count"]),
-            ]),
+            UnexpectedFormat([DecodeError("Int", "String", ["followers_count"])]),
           ),
         )
       }),
@@ -138,11 +134,7 @@ pub fn decoding_tests() {
         "{ \"token\": 1234 }"
         |> models.decode_registration_token
         |> expect.to_equal(
-          Error(
-            UnexpectedFormat([
-              DecodeError("String", "Int", ["token"]),
-            ]),
-          ),
+          Error(UnexpectedFormat([DecodeError("String", "Int", ["token"])])),
         )
       }),
     ]),
@@ -156,9 +148,7 @@ pub fn decoding_tests() {
         "[ \"1234\", 5678, \"9012\"]"
         |> models.decode_unadopted
         |> expect.to_equal(
-          Error(
-            UnexpectedFormat([DecodeError("String", "Int", ["*"])]),
-          ),
+          Error(UnexpectedFormat([DecodeError("String", "Int", ["*"])])),
         )
       }),
       it("Incorrect Type", fn() {
@@ -204,9 +194,7 @@ pub fn decoding_tests() {
         |> models.decode_cron
         |> expect.to_equal(
           Error(
-            UnexpectedFormat([
-              DecodeError("Int", "String", ["exec_times"]),
-            ]),
+            UnexpectedFormat([DecodeError("Int", "String", ["exec_times"])]),
           ),
         )
       }),
@@ -333,11 +321,7 @@ pub fn decoding_tests() {
         "
         |> models.decode_email
         |> expect.to_equal(
-          Error(
-            UnexpectedFormat([
-              DecodeError("Int", "String", ["user_id"]),
-            ]),
-          ),
+          Error(UnexpectedFormat([DecodeError("Int", "String", ["user_id"])])),
         )
       }),
     ]),
@@ -417,7 +401,15 @@ pub fn decoding_tests() {
         "
         |> models.decode_email_list
         |> expect.to_equal(
-          Error(UnexpectedFormat([DecodeError("Dict", "String", ["*"]), DecodeError("Dict", "String", ["*"]), DecodeError("Dict", "String", ["*"]), DecodeError("Dict", "String", ["*"]), DecodeError("Dict", "String", ["*"])]))
+          Error(
+            UnexpectedFormat([
+              DecodeError("Dict", "String", ["*"]),
+              DecodeError("Dict", "String", ["*"]),
+              DecodeError("Dict", "String", ["*"]),
+              DecodeError("Dict", "String", ["*"]),
+              DecodeError("Dict", "String", ["*"]),
+            ]),
+          ),
         )
       }),
     ]),
