@@ -1,9 +1,0 @@
-name: Check Gleam Format
-
-description: Check that your gleam code is formatted properly
-
-runs:
-  using: composite
-  steps:
-    - run: gleam format --check src test
-      shell: bash

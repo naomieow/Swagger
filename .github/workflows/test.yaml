@@ -1,0 +1,19 @@
+name: 🧪 Run Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_call:
+
+jobs:
+  test:
+    name: 🚀 Run Tests
+    uses: TanklesXL/gleam_actions/.github/workflows/test.yaml@main
+    with:
+      gleam_version: 1.2.1
+      test_node: true
+      test_erlang: true
+
+
+
