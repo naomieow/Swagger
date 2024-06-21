@@ -1,0 +1,15 @@
+on: [push]
+name: 🧪 Run Tests
+jobs:
+  test:
+    runs-on: erlang-latest
+    steps:
+      - name: 🚚 Checkout
+        uses: actions/checkout@v3
+      - name: 📦 Setup
+        uses: https://github.com/asdf-vm/actions/install@v3.0.2
+      - name: 🚀 Run Tests
+        run: |
+          gleam test
+
+
