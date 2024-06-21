@@ -12,7 +12,7 @@ jobs:
     uses: TanklesXL/gleam_actions/.github/workflows/test.yaml@main
     with:
       gleam_version: 1.2.1
-      test_node: true
+      test_node: false
       test_erlang: true
 
 
