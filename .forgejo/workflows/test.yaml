@@ -4,16 +4,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: 🚚 Checkout
-        uses: actions/checkout@v3
-      - name: ♻️ Update
-        run: |
-          apt update
-          apt -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
-      - name: 📦 Setup
-        uses: https://github.com/asdf-vm/actions/install@v3.0.2
-      - name: 🚀 Run Tests
-        run: |
-          gleam test
+      - uses: https://github.com/TanklesXL/gleam_actions/.github/workflows/test.yaml@main
+        with:
+          gleam_version: 1.2.1
+          test_node: true
+          test_erlang: true
 
 
