@@ -1,7 +1,7 @@
 import gleam/http/request.{type Request}
-import swagger.{type Settings}
 import gleam/list
 import gleam/option
+import swagger.{type Settings}
 
 pub fn with_headers(
   req: Request(String),

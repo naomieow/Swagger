@@ -1,15 +1,18 @@
-import swagger
+import gleam/dynamic.{field, string}
 import gleam/http
 import gleam/http/request.{type Request}
-import swagger/internal/utils
 import gleam/int
-import gleam/dynamic.{field, string}
-import swagger/models.{type ActivityPub, ActivityPub}
 import gleam/json
+import swagger
+import swagger/internal/utils
+import swagger/models.{type ActivityPub, ActivityPub}
 
 /// Returns the person actor for a user
 /// 
-pub fn get_person(settings settings: swagger.Settings, user_id user_id: Int) -> Request(String) {
+pub fn get_person(
+  settings settings: swagger.Settings,
+  user_id user_id: Int,
+) -> Request(String) {
   let user_id = int.to_string(user_id)
 
   let #(query, headers) = utils.auth(settings)
@@ -22,17 +25,19 @@ pub fn get_person(settings settings: swagger.Settings, user_id user_id: Int) -> 
   |> utils.with_headers(headers)
 }
 
-pub fn decode_get_person(json_string json_string: String) -> Result(ActivityPub, json.DecodeError) {
-  let decoder = dynamic.decode1(
-    ActivityPub,
-    field("@context", string),
-  )
+pub fn decode_get_person(
+  json_string json_string: String,
+) -> Result(ActivityPub, json.DecodeError) {
+  let decoder = dynamic.decode1(ActivityPub, field("@context", string))
   json.decode(json_string, decoder)
 }
 
 /// Send to the inbox
 /// 
-pub fn send_to_inbox(settings settings: swagger.Settings, user_id user_id: Int) -> Request(String) {
+pub fn send_to_inbox(
+  settings settings: swagger.Settings,
+  user_id user_id: Int,
+) -> Request(String) {
   let user_id = int.to_string(user_id)
 
   let #(query, headers) = utils.auth(settings)

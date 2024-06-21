@@ -1,19 +1,23 @@
 //// Models, decoders and encoders
 //// 
 
-import gleam/option.{type Option}
 import gleam/dynamic.{type Dynamic} as dyn
-import gleam/json.{object, string, bool, array, int}
+import gleam/json.{array, bool, int, object, string}
 import gleam/list
+import gleam/option.{type Option}
 import swagger/internal/decode as d
 
-pub fn decode_registration_token(json_string json_string: String) -> Result(String, json.DecodeError) {
+pub fn decode_registration_token(
+  json_string json_string: String,
+) -> Result(String, json.DecodeError) {
   let decoder = dyn.field("token", dyn.string)
 
   json.decode(json_string, decoder)
 }
 
-pub fn decode_unadopted(json_string json_string: String) -> Result(List(String), json.DecodeError) {
+pub fn decode_unadopted(
+  json_string json_string: String,
+) -> Result(List(String), json.DecodeError) {
   let decoder = dyn.list(dyn.string)
 
   json.decode(json_string, decoder)
@@ -407,19 +411,24 @@ pub type CreateHookOption {
 
 /// Encodes a [CreateHookOption](#CreateHookOption) into a Json string
 /// 
-pub fn encode_create_hook_option(hook_option hook_option: CreateHookOption) -> String {
+pub fn encode_create_hook_option(
+  hook_option hook_option: CreateHookOption,
+) -> String {
   object([
     #("active", bool(hook_option.active)),
     #("authorization_header", string(hook_option.authorization_header)),
     #("branch_filter", string(hook_option.branch_filter)),
-    #("config", object(
-      hook_option.config.options 
-      |> list.map(fn(x) { #(x.0, string(x.1)) })
-    )),
+    #(
+      "config",
+      object(
+        hook_option.config.options
+        |> list.map(fn(x) { #(x.0, string(x.1)) }),
+      ),
+    ),
     #("events", array(hook_option.events, string)),
-    #("type", string(hook_option.hook_type |> encode_hook_type
-  )),
-  ]) |> json.to_string
+    #("type", string(hook_option.hook_type |> encode_hook_type)),
+  ])
+  |> json.to_string
 }
 
 pub type CreateHookOptionConfig {
@@ -450,12 +459,15 @@ pub type CreateKeyOption {
 
 /// Encodes a [CreateKeyOption](#CreateKeyOption) into a Json string
 /// 
-pub fn encode_create_key_option(key_option key_option: CreateKeyOption) -> String {
+pub fn encode_create_key_option(
+  key_option key_option: CreateKeyOption,
+) -> String {
   object([
     #("key", string(key_option.key)),
     #("read_only", bool(key_option.read_only)),
     #("title", string(key_option.title)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type CreateLabelOption {
@@ -525,17 +537,23 @@ pub type CreateOrgOption {
 
 /// Encodes a [CreateOrgOption](#CreateOrgOption) into a Json string
 /// 
-pub fn encode_create_org_option(org_option org_option: CreateOrgOption) -> String {
+pub fn encode_create_org_option(
+  org_option org_option: CreateOrgOption,
+) -> String {
   object([
     #("description", string(org_option.description)),
     #("email", string(org_option.email)),
     #("full_name", string(org_option.full_name)),
     #("location", string(org_option.location)),
-    #("repo_admin_change_team_access", bool(org_option.repo_admin_change_team_access)),
+    #(
+      "repo_admin_change_team_access",
+      bool(org_option.repo_admin_change_team_access),
+    ),
     #("username", string(org_option.username)),
     #("visibility", string(org_option.visibility |> encode_org_visibility)),
     #("website", string(org_option.website)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type CreatePullRequestOption {
@@ -648,7 +666,9 @@ pub type CreateRepoOption {
 
 /// Encodes a [CreateHookOption](#CreateHookOption) into a Json string
 /// 
-pub fn encode_create_repo_option(repo_option repo_option: CreateRepoOption) -> String {
+pub fn encode_create_repo_option(
+  repo_option repo_option: CreateRepoOption,
+) -> String {
   object([
     #("auto_init", bool(repo_option.auto_init)),
     #("default_branch", string(repo_option.default_branch)),
@@ -657,12 +677,16 @@ pub fn encode_create_repo_option(repo_option repo_option: CreateRepoOption) -> S
     #("issue_labels", string(repo_option.issue_labels)),
     #("license", string(repo_option.license)),
     #("name", bool(repo_option.name)),
-    #("object_format", string(repo_option.object_format_name |> encode_object_format)),
+    #(
+      "object_format",
+      string(repo_option.object_format_name |> encode_object_format),
+    ),
     #("private", bool(repo_option.private)),
     #("readme", string(repo_option.readme)),
     #("template", bool(repo_option.template)),
     #("trust_model", string(repo_option.trust_model |> encode_trust_model)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type CreateStatusOption {
@@ -727,7 +751,9 @@ pub type CreateUserOption {
 
 /// Encodes a [CreateUserOption](#CreateUserOption) into a Json string
 /// 
-pub fn encode_create_user_option(user_option user_option: CreateUserOption) -> String {
+pub fn encode_create_user_option(
+  user_option user_option: CreateUserOption,
+) -> String {
   object([
     #("created_at", string(user_option.created_at)),
     #("email", string(user_option.email)),
@@ -740,7 +766,8 @@ pub fn encode_create_user_option(user_option user_option: CreateUserOption) -> S
     #("source_id", int(user_option.source_id)),
     #("username", string(user_option.username)),
     #("visibility", string(user_option.visibility)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type CreateWikiPageOptions {
@@ -764,13 +791,7 @@ fn cron_decoder() -> d.Decoder(Cron) {
     use next <- d.parameter
     use prev <- d.parameter
     use schedule <- d.parameter
-    Cron(
-      exec_times,
-      name,
-      next,
-      prev,
-      schedule
-    )
+    Cron(exec_times, name, next, prev, schedule)
   })
   |> d.field("exec_times", d.int)
   |> d.field("name", d.string)
@@ -779,7 +800,9 @@ fn cron_decoder() -> d.Decoder(Cron) {
   |> d.field("schedule", d.string)
 }
 
-pub fn decode_cron_list(json_string json_string: String) -> Result(List(Cron), json.DecodeError) {
+pub fn decode_cron_list(
+  json_string json_string: String,
+) -> Result(List(Cron), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(cron_decoder())
   |> d.run(data)
@@ -875,17 +898,23 @@ pub type EditHookOption {
 
 /// Encodes an [EditHookOption](#EditHookOption) into a Json string
 /// 
-pub fn encode_edit_hook_option(hook_option hook_option: EditHookOption) -> String {
+pub fn encode_edit_hook_option(
+  hook_option hook_option: EditHookOption,
+) -> String {
   object([
     #("active", bool(hook_option.active)),
     #("authorization_header", string(hook_option.authorization_header)),
     #("branch_filter", string(hook_option.branch_filter)),
-    #("config", object(
-      hook_option.config 
-      |> list.map(fn(x) { #(x.0, string(x.1)) })
-    )),
+    #(
+      "config",
+      object(
+        hook_option.config
+        |> list.map(fn(x) { #(x.0, string(x.1)) }),
+      ),
+    ),
     #("events", array(hook_option.events, string)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type EditIssueCommentOption {
@@ -1053,7 +1082,9 @@ pub type EditUserOption {
 
 /// Encodes a [EditUserOption](#EditUserOption) into a Json string
 /// 
-pub fn encode_edit_user_option(user_option user_option: EditUserOption) -> String {
+pub fn encode_edit_user_option(
+  user_option user_option: EditUserOption,
+) -> String {
   object([
     #("active", bool(user_option.active)),
     #("admin", bool(user_option.admin)),
@@ -1074,7 +1105,8 @@ pub fn encode_edit_user_option(user_option user_option: EditUserOption) -> Strin
     #("source_id", int(user_option.source_id)),
     #("visibility", string(user_option.visibility)),
     #("website", string(user_option.website)),
-  ]) |> json.to_string
+  ])
+  |> json.to_string
 }
 
 pub type Email {
@@ -1103,13 +1135,17 @@ fn email_decoder() -> d.Decoder(Email) {
   |> d.field("verified", d.bool)
 }
 
-pub fn decode_email_list(json_string json_string: String) -> Result(List(Email), json.DecodeError) {
+pub fn decode_email_list(
+  json_string json_string: String,
+) -> Result(List(Email), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(email_decoder())
   |> d.run(data)
 }
 
-pub fn decode_email(json_string json_string: String) -> Result(Email, json.DecodeError) {
+pub fn decode_email(
+  json_string json_string: String,
+) -> Result(Email, json.DecodeError) {
   use data <- json.decode(json_string)
   email_decoder()
   |> d.run(data)
@@ -1149,8 +1185,8 @@ fn external_tracker_decoder() -> d.Decoder(ExternalTracker) {
       external_tracker_format,
       external_tracker_regexp_pattern,
       external_tracker_style |> external_tracker_style_from_string,
-      external_tracker_url
-      )
+      external_tracker_url,
+    )
   })
   |> d.field("external_tracker_format", d.string)
   |> d.field("external_tracker_regexp_pattern", d.string)
@@ -1364,7 +1400,20 @@ fn hook_decoder() -> d.Decoder(Hook) {
     use hook_type <- d.parameter
     use updated_at <- d.parameter
     use url <- d.parameter
-    Hook(active, authorization_header, branch_filter, config, content_type, created_at, events, id, metadata, hook_type, updated_at, url)
+    Hook(
+      active,
+      authorization_header,
+      branch_filter,
+      config,
+      content_type,
+      created_at,
+      events,
+      id,
+      metadata,
+      hook_type,
+      updated_at,
+      url,
+    )
   })
   |> d.field("active", d.bool)
   |> d.field("authorization_header", d.string)
@@ -1380,13 +1429,17 @@ fn hook_decoder() -> d.Decoder(Hook) {
   |> d.field("url", d.string)
 }
 
-pub fn decode_hook_list(json_string json_string: String) -> Result(List(Hook), json.DecodeError) {
+pub fn decode_hook_list(
+  json_string json_string: String,
+) -> Result(List(Hook), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(hook_decoder())
   |> d.run(data)
 }
 
-pub fn decode_hook(json_string json_string: String) -> Result(Hook, json.DecodeError) {
+pub fn decode_hook(
+  json_string json_string: String,
+) -> Result(Hook, json.DecodeError) {
   use data <- json.decode(json_string)
   hook_decoder()
   |> d.run(data)
@@ -1409,12 +1462,16 @@ fn internal_tracker_decoder() -> d.Decoder(InternalTracker) {
     use allow_only_contributors_to_track_time <- d.parameter
     use enable_issue_dependecies <- d.parameter
     use enable_time_tracker <- d.parameter
-    InternalTracker(allow_only_contributors_to_track_time, enable_issue_dependecies, enable_time_tracker)
+    InternalTracker(
+      allow_only_contributors_to_track_time,
+      enable_issue_dependecies,
+      enable_time_tracker,
+    )
   })
   |> d.field("allow_only_contributors_to_track_time", d.bool)
   |> d.field("enable_issue_dependecies", d.bool)
   |> d.field("enable_time_tracker", d.bool)
-  }
+}
 
 pub type Issue {
   Issue(
@@ -1743,7 +1800,19 @@ fn organization_decoder() -> d.Decoder(Organization) {
     use username <- d.parameter
     use visibility <- d.parameter
     use website <- d.parameter
-    Organization(avatar_url, description, email, full_name, id, location, name, repo_admin_change_team_access, username, visibility, website)
+    Organization(
+      avatar_url,
+      description,
+      email,
+      full_name,
+      id,
+      location,
+      name,
+      repo_admin_change_team_access,
+      username,
+      visibility,
+      website,
+    )
   })
   |> d.field("avatar_url", d.string)
   |> d.field("description", d.string)
@@ -1758,13 +1827,17 @@ fn organization_decoder() -> d.Decoder(Organization) {
   |> d.field("website", d.string)
 }
 
-pub fn decode_organization_list(json_string json_string: String) -> Result(List(Organization), json.DecodeError) {
+pub fn decode_organization_list(
+  json_string json_string: String,
+) -> Result(List(Organization), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(organization_decoder())
   |> d.run(data)
 }
 
-pub fn decode_organization(json_string json_string: String) -> Result(Organization, json.DecodeError) {
+pub fn decode_organization(
+  json_string json_string: String,
+) -> Result(Organization, json.DecodeError) {
   use data <- json.decode(json_string)
   organization_decoder()
   |> d.run(data)
@@ -1909,7 +1982,9 @@ fn public_key_decoder() -> d.Decoder(PublicKey) {
   |> d.field("user", user_decoder())
 }
 
-pub fn decode_public_key(json_string json_string: String) -> Result(PublicKey, json.DecodeError) {
+pub fn decode_public_key(
+  json_string json_string: String,
+) -> Result(PublicKey, json.DecodeError) {
   use data <- json.decode(json_string)
   public_key_decoder()
   |> d.run(data)
@@ -2049,10 +2124,11 @@ pub type RenameUserOption {
 
 /// Encodes a [RenameUserOption](#RenameUserOption) into a Json string
 /// 
-pub fn encode_rename_user_option(user_option user_option: RenameUserOption) -> String {
-  object([
-    #("new_username", string(user_option.new_username))
-  ]) |> json.to_string
+pub fn encode_rename_user_option(
+  user_option user_option: RenameUserOption,
+) -> String {
+  object([#("new_username", string(user_option.new_username))])
+  |> json.to_string
 }
 
 pub type ReplaceFlagsOption {
@@ -2092,7 +2168,6 @@ fn repo_transfer_decoder() -> d.Decoder(RepoTransfer) {
   |> d.field("doer", user_decoder())
   |> d.field("recipient", user_decoder())
   |> d.field("teams", d.list(team_decoder()))
-
 }
 
 pub type Repository {
@@ -2284,7 +2359,7 @@ fn repository_decoder() -> d.Decoder(Repository) {
       watchers_count,
       website,
       wiki_branch,
-      )
+    )
   })
   |> d.field("allow_fast_forward_only_merge", d.bool)
   |> d.field("allow_merge_commits", d.bool)
@@ -2348,13 +2423,17 @@ fn repository_decoder() -> d.Decoder(Repository) {
   |> d.field("wiki_branch", d.string)
 }
 
-pub fn decode_repository_list(json_string json_string: String) -> Result(List(Repository), json.DecodeError) {
+pub fn decode_repository_list(
+  json_string json_string: String,
+) -> Result(List(Repository), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(repository_decoder())
   |> d.run(data)
 }
 
-pub fn decode_repository(json_string json_string: String) -> Result(Repository, json.DecodeError) {
+pub fn decode_repository(
+  json_string json_string: String,
+) -> Result(Repository, json.DecodeError) {
   use data <- json.decode(json_string)
   repository_decoder()
   |> d.run(data)
@@ -2646,13 +2725,17 @@ fn user_decoder() -> d.Decoder(User) {
   |> d.field("website", d.string)
 }
 
-pub fn decode_user(json_string json_string: String) -> Result(User, json.DecodeError) {
+pub fn decode_user(
+  json_string json_string: String,
+) -> Result(User, json.DecodeError) {
   use data <- json.decode(json_string)
   user_decoder()
   |> d.run(data)
 }
 
-pub fn decode_user_list(json_string json_string: String) -> Result(List(User), json.DecodeError) {
+pub fn decode_user_list(
+  json_string json_string: String,
+) -> Result(List(User), json.DecodeError) {
   use data <- json.decode(json_string)
   d.list(user_decoder())
   |> d.run(data)

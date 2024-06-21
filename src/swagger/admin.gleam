@@ -1,19 +1,19 @@
-import swagger
+import gleam/bool
 import gleam/http
 import gleam/http/request.{type Request}
-import gleam/option.{type Option, Some}
-import swagger/internal/utils
 import gleam/int
 import gleam/list
-import gleam/bool
+import gleam/option.{type Option, Some}
 import gleam/string
+import swagger
+import swagger/internal/utils
 import swagger/models
 
 /// Returns a list of all cron tasks
 /// 
 /// Decoder: [decode_crons](#decode_crons)
 pub fn get_cron_tasks(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   page page: Option(Int),
   limit limit: Option(Int),
 ) -> Request(String) {
@@ -42,7 +42,7 @@ pub fn get_cron_tasks(
 /// 
 pub fn run_cron_task(
   settings settings: swagger.Settings,
-  task task: String
+  task task: String,
 ) -> Request(String) {
   let #(query, headers) = utils.auth(settings)
 
@@ -58,7 +58,7 @@ pub fn run_cron_task(
 /// 
 /// Decoder: [decode_emails](#decode_emails)
 pub fn get_emails(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   page page: Option(Int),
   limit limit: Option(Int),
 ) -> Request(String) {
@@ -82,7 +82,6 @@ pub fn get_emails(
   |> request.set_query(query)
   |> utils.with_headers(headers)
 }
-
 
 /// Searches all emails and returns a list of emails
 /// 
@@ -119,7 +118,7 @@ pub fn search_emails(
 /// 
 /// Decoder: [decode_hooks](#decode_hooks)
 pub fn get_hooks(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   page page: Option(Int),
   limit limit: Option(Int),
 ) -> Request(String) {
@@ -148,8 +147,8 @@ pub fn get_hooks(
 /// 
 /// Decoder: [decode_hook](#decode_hook)
 pub fn new_hook(
-  settings settings: swagger.Settings, 
-  body body: models.CreateHookOption
+  settings settings: swagger.Settings,
+  body body: models.CreateHookOption,
 ) -> Request(String) {
   let #(query, headers) = utils.auth(settings)
 
@@ -166,7 +165,7 @@ pub fn new_hook(
 /// 
 /// Decoder: [decode_hook](#decode_hook)
 pub fn get_hook(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   id id: Int,
 ) -> Request(String) {
   let id = id |> int.to_string
@@ -184,7 +183,7 @@ pub fn get_hook(
 /// Deletes a webhook
 /// 
 pub fn delete_hook(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   id id: Int,
 ) -> Request(String) {
   let id = id |> int.to_string
@@ -205,7 +204,7 @@ pub fn delete_hook(
 pub fn edit_hook(
   settings settings: swagger.Settings,
   id id: Int,
-  body body: models.EditHookOption
+  body body: models.EditHookOption,
 ) -> Request(String) {
   let id = id |> int.to_string
 
@@ -224,7 +223,7 @@ pub fn edit_hook(
 /// 
 /// Decoder: [decode_orgs](#decode_orgs)
 pub fn get_orgs(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   page page: Option(Int),
   limit limit: Option(Int),
 ) -> Request(String) {
@@ -252,9 +251,7 @@ pub fn get_orgs(
 /// Get a global actions runner registration token
 /// 
 /// Decoder: [decode_reg_token](#decode_reg_token)
-pub fn get_reg_token(
-  settings settings: swagger.Settings,
-) -> Request(String) {
+pub fn get_reg_token(settings settings: swagger.Settings) -> Request(String) {
   let #(query, headers) = utils.auth(settings)
 
   request.new()
@@ -269,10 +266,10 @@ pub fn get_reg_token(
 /// 
 /// Decoder: [decode_unadopted](#decode_unadopted)
 pub fn get_unadopted(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   page page: Option(Int),
   limit limit: Option(Int),
-  pattern pattern: Option(String)
+  pattern pattern: Option(String),
 ) -> Request(String) {
   let page = page |> option.map(int.to_string)
   let limit = limit |> option.map(int.to_string)
@@ -313,7 +310,6 @@ pub fn adopt_unadopted(
   |> utils.with_headers(headers)
 }
 
-
 /// Delete unadopted files
 /// 
 pub fn delete_unadopted(
@@ -335,7 +331,7 @@ pub fn delete_unadopted(
 /// 
 /// Decoder: [decode_users](#decode_users)
 pub fn search_users(
-  settings settings: swagger.Settings, 
+  settings settings: swagger.Settings,
   source_id source_id: Option(Int),
   login_name login_name: Option(String),
   page page: Option(Int),
@@ -390,7 +386,8 @@ pub fn delete_user(
   username username: String,
   purge purge: Option(Bool),
 ) -> Request(String) {
-  let purge = purge |> option.map(bool.to_string) |> option.map(string.lowercase)
+  let purge =
+    purge |> option.map(bool.to_string) |> option.map(string.lowercase)
 
   let #(query, headers) = utils.auth(settings)
   let query =
@@ -408,7 +405,6 @@ pub fn delete_user(
   |> request.set_query(query)
   |> utils.with_headers(headers)
 }
-
 
 /// Updates an existing user
 /// 
@@ -498,12 +494,11 @@ pub fn rename_user(
   request.new()
   |> request.set_method(http.Post)
   |> request.set_host(settings.host)
-  |> request.set_path("api/v1/admin/users/" <> username <>"/rename")
+  |> request.set_path("api/v1/admin/users/" <> username <> "/rename")
   |> request.set_query(query)
   |> request.set_body(models.encode_rename_user_option(body))
   |> utils.with_headers(headers)
 }
-
 
 /// Creates a new repository for a user
 /// 
@@ -518,9 +513,8 @@ pub fn new_repository(
   request.new()
   |> request.set_method(http.Post)
   |> request.set_host(settings.host)
-  |> request.set_path("api/v1/admin/users/" <> username <>"/repos")
+  |> request.set_path("api/v1/admin/users/" <> username <> "/repos")
   |> request.set_query(query)
   |> request.set_body(models.encode_create_repo_option(repository))
   |> utils.with_headers(headers)
 }
-
