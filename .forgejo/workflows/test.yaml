@@ -4,10 +4,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: https://github.com/TanklesXL/gleam_actions/.github/workflows/test.yaml@main
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+      - name: ⭐ Install Gleam
+        uses: naomi/Swagger/.forgejo/actions/install_gleam@main
         with:
           gleam_version: 1.2.1
-          test_node: true
-          test_erlang: true
+          erlang_version: 27
+      - name: 💄 Format Code
+        uses: naomi/Swagger/.forgejo/actions/format@main
+      - name: 🚀 Run Tests
+        uses: naomi/Swagger/.forgejo/actions/test@main
+        with:
+          target: "erlang"
+
 
 
