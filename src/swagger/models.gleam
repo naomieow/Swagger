@@ -2,7 +2,22 @@
 //// 
 
 import gleam/option.{type Option}
-import gleam/dynamic.{type Dynamic}
+import gleam/dynamic.{type Dynamic} as dyn
+import gleam/json.{object, string, bool, array, int}
+import gleam/list
+import swagger/internal/decode as d
+
+pub fn decode_registration_token(json_string json_string: String) -> Result(String, json.DecodeError) {
+  let decoder = dyn.field("token", dyn.string)
+
+  json.decode(json_string, decoder)
+}
+
+pub fn decode_unadopted(json_string json_string: String) -> Result(List(String), json.DecodeError) {
+  let decoder = dyn.list(dyn.string)
+
+  json.decode(json_string, decoder)
+}
 
 pub type APIError {
   APIError(message: String, url: String)
@@ -361,6 +376,24 @@ pub type HookType {
   PackagistHook
 }
 
+/// Converts a [HookType](#HookType) to a string
+/// 
+pub fn encode_hook_type(hook_type hook_type: HookType) -> String {
+  case hook_type {
+    ForgejoHook -> "forgejo"
+    DingtalkHook -> "dingtalk"
+    DiscordHook -> "discord"
+    GiteaHook -> "gitea"
+    GogsHook -> "gogs"
+    MSTeamsHook -> "msteams"
+    SlackHook -> "slack"
+    TelegramHook -> "telegram"
+    FeishuHook -> "feishu"
+    WeChatWorkHook -> "wechatwork"
+    PackagistHook -> "packagist"
+  }
+}
+
 pub type CreateHookOption {
   CreateHookOption(
     active: Bool,
@@ -370,6 +403,23 @@ pub type CreateHookOption {
     events: List(String),
     hook_type: HookType,
   )
+}
+
+/// Encodes a [CreateHookOption](#CreateHookOption) into a Json string
+/// 
+pub fn encode_create_hook_option(hook_option hook_option: CreateHookOption) -> String {
+  object([
+    #("active", bool(hook_option.active)),
+    #("authorization_header", string(hook_option.authorization_header)),
+    #("branch_filter", string(hook_option.branch_filter)),
+    #("config", object(
+      hook_option.config.options 
+      |> list.map(fn(x) { #(x.0, string(x.1)) })
+    )),
+    #("events", array(hook_option.events, string)),
+    #("type", string(hook_option.hook_type |> encode_hook_type
+  )),
+  ]) |> json.to_string
 }
 
 pub type CreateHookOptionConfig {
@@ -396,6 +446,16 @@ pub type CreateIssueOption {
 
 pub type CreateKeyOption {
   CreateKeyOption(key: String, read_only: Bool, title: String)
+}
+
+/// Encodes a [CreateKeyOption](#CreateKeyOption) into a Json string
+/// 
+pub fn encode_create_key_option(key_option key_option: CreateKeyOption) -> String {
+  object([
+    #("key", string(key_option.key)),
+    #("read_only", bool(key_option.read_only)),
+    #("title", string(key_option.title)),
+  ]) |> json.to_string
 }
 
 pub type CreateLabelOption {
@@ -440,6 +500,16 @@ pub type OrgVisibility {
   Private
 }
 
+/// Converts an [OrgVisibility](#OrgVisibility) to a string
+/// 
+pub fn encode_org_visibility(visibility visibility: OrgVisibility) -> String {
+  case visibility {
+    Public -> "public"
+    Limited -> "limited"
+    Private -> "private"
+  }
+}
+
 pub type CreateOrgOption {
   CreateOrgOption(
     description: String,
@@ -451,6 +521,21 @@ pub type CreateOrgOption {
     visibility: OrgVisibility,
     website: String,
   )
+}
+
+/// Encodes a [CreateOrgOption](#CreateOrgOption) into a Json string
+/// 
+pub fn encode_create_org_option(org_option org_option: CreateOrgOption) -> String {
+  object([
+    #("description", string(org_option.description)),
+    #("email", string(org_option.email)),
+    #("full_name", string(org_option.full_name)),
+    #("location", string(org_option.location)),
+    #("repo_admin_change_team_access", bool(org_option.repo_admin_change_team_access)),
+    #("username", string(org_option.username)),
+    #("visibility", string(org_option.visibility |> encode_org_visibility)),
+    #("website", string(org_option.website)),
+  ]) |> json.to_string
 }
 
 pub type CreatePullRequestOption {
@@ -513,9 +598,35 @@ pub type TrustModel {
   CollaboratorCommitter
 }
 
+pub fn encode_trust_model(model model: TrustModel) -> String {
+  case model {
+    Default -> "default"
+    Collaborator -> "collaborator"
+    Comitter -> "comitter"
+    CollaboratorCommitter -> "collaboratorcomitter"
+  }
+}
+
 pub type ObjectFormat {
   Sha1
   Sha256
+}
+
+fn object_format_from_string(format: String) -> ObjectFormat {
+  case format {
+    "sha1" -> Sha1
+    "sha256" -> Sha256
+    _ -> todo as "unknown object format"
+  }
+}
+
+/// Converts an [ObjectFormat](#ObjectFormat) to a string
+/// 
+pub fn encode_object_format(format format: ObjectFormat) -> String {
+  case format {
+    Sha1 -> "sha1"
+    Sha256 -> "sha256"
+  }
 }
 
 pub type CreateRepoOption {
@@ -533,6 +644,25 @@ pub type CreateRepoOption {
     template: Bool,
     trust_model: TrustModel,
   )
+}
+
+/// Encodes a [CreateHookOption](#CreateHookOption) into a Json string
+/// 
+pub fn encode_create_repo_option(repo_option repo_option: CreateRepoOption) -> String {
+  object([
+    #("auto_init", bool(repo_option.auto_init)),
+    #("default_branch", string(repo_option.default_branch)),
+    #("description", string(repo_option.description)),
+    #("gitignores", string(repo_option.gitignores)),
+    #("issue_labels", string(repo_option.issue_labels)),
+    #("license", string(repo_option.license)),
+    #("name", bool(repo_option.name)),
+    #("object_format", string(repo_option.object_format_name |> encode_object_format)),
+    #("private", bool(repo_option.private)),
+    #("readme", string(repo_option.readme)),
+    #("template", bool(repo_option.template)),
+    #("trust_model", string(repo_option.trust_model |> encode_trust_model)),
+  ]) |> json.to_string
 }
 
 pub type CreateStatusOption {
@@ -554,6 +684,17 @@ pub type TeamPermissions {
   Write
   Admin
   Owner
+}
+
+fn team_permissions_from_string(permission: String) -> TeamPermissions {
+  case permission {
+    "none" -> None
+    "read" -> Read
+    "write" -> Write
+    "admin" -> Admin
+    "owner" -> Owner
+    _ -> todo as "unknown team permission"
+  }
 }
 
 pub type CreateTeamOption {
@@ -584,6 +725,24 @@ pub type CreateUserOption {
   )
 }
 
+/// Encodes a [CreateUserOption](#CreateUserOption) into a Json string
+/// 
+pub fn encode_create_user_option(user_option user_option: CreateUserOption) -> String {
+  object([
+    #("created_at", string(user_option.created_at)),
+    #("email", string(user_option.email)),
+    #("full_name", string(user_option.full_name)),
+    #("login_name", string(user_option.login_name)),
+    #("must_change_password", bool(user_option.must_change_password)),
+    #("password", string(user_option.password)),
+    #("restricted", bool(user_option.restricted)),
+    #("send_notify", bool(user_option.send_notify)),
+    #("source_id", int(user_option.source_id)),
+    #("username", string(user_option.username)),
+    #("visibility", string(user_option.visibility)),
+  ]) |> json.to_string
+}
+
 pub type CreateWikiPageOptions {
   CreateWikiPageOptions(content_base64: String, message: String, title: String)
 }
@@ -596,6 +755,34 @@ pub type Cron {
     prev: String,
     schedule: String,
   )
+}
+
+fn cron_decoder() -> d.Decoder(Cron) {
+  d.into({
+    use exec_times <- d.parameter
+    use name <- d.parameter
+    use next <- d.parameter
+    use prev <- d.parameter
+    use schedule <- d.parameter
+    Cron(
+      exec_times,
+      name,
+      next,
+      prev,
+      schedule
+    )
+  })
+  |> d.field("exec_times", d.int)
+  |> d.field("name", d.string)
+  |> d.field("next", d.string)
+  |> d.field("prev", d.string)
+  |> d.field("schedule", d.string)
+}
+
+pub fn decode_cron_list(json_string json_string: String) -> Result(List(Cron), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(cron_decoder())
+  |> d.run(data)
 }
 
 pub type DeleteEmailOption {
@@ -684,6 +871,21 @@ pub type EditHookOption {
     config: List(#(String, String)),
     events: List(String),
   )
+}
+
+/// Encodes an [EditHookOption](#EditHookOption) into a Json string
+/// 
+pub fn encode_edit_hook_option(hook_option hook_option: EditHookOption) -> String {
+  object([
+    #("active", bool(hook_option.active)),
+    #("authorization_header", string(hook_option.authorization_header)),
+    #("branch_filter", string(hook_option.branch_filter)),
+    #("config", object(
+      hook_option.config 
+      |> list.map(fn(x) { #(x.0, string(x.1)) })
+    )),
+    #("events", array(hook_option.events, string)),
+  ]) |> json.to_string
 }
 
 pub type EditIssueCommentOption {
@@ -849,6 +1051,32 @@ pub type EditUserOption {
   )
 }
 
+/// Encodes a [EditUserOption](#EditUserOption) into a Json string
+/// 
+pub fn encode_edit_user_option(user_option user_option: EditUserOption) -> String {
+  object([
+    #("active", bool(user_option.active)),
+    #("admin", bool(user_option.admin)),
+    #("allow_create_organization", bool(user_option.allow_create_organization)),
+    #("allow_git_hook", bool(user_option.allow_git_hook)),
+    #("allow_import_local", bool(user_option.allow_import_local)),
+    #("description", string(user_option.description)),
+    #("email", string(user_option.email)),
+    #("full_name", string(user_option.full_name)),
+    #("location", string(user_option.location)),
+    #("login_name", string(user_option.login_name)),
+    #("max_repo_creation", int(user_option.max_repo_creation)),
+    #("must_change_password", bool(user_option.must_change_password)),
+    #("password", string(user_option.password)),
+    #("prohibit_login", bool(user_option.prohibit_login)),
+    #("pronouns", string(user_option.pronouns)),
+    #("restricted", bool(user_option.restricted)),
+    #("source_id", int(user_option.source_id)),
+    #("visibility", string(user_option.visibility)),
+    #("website", string(user_option.website)),
+  ]) |> json.to_string
+}
+
 pub type Email {
   Email(
     email: String,
@@ -859,10 +1087,47 @@ pub type Email {
   )
 }
 
+fn email_decoder() -> d.Decoder(Email) {
+  d.into({
+    use email <- d.parameter
+    use primary <- d.parameter
+    use user_id <- d.parameter
+    use username <- d.parameter
+    use verified <- d.parameter
+    Email(email, primary, user_id, username, verified)
+  })
+  |> d.field("email", d.string)
+  |> d.field("primary", d.bool)
+  |> d.field("user_id", d.int)
+  |> d.field("username", d.string)
+  |> d.field("verified", d.bool)
+}
+
+pub fn decode_email_list(json_string json_string: String) -> Result(List(Email), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(email_decoder())
+  |> d.run(data)
+}
+
+pub fn decode_email(json_string json_string: String) -> Result(Email, json.DecodeError) {
+  use data <- json.decode(json_string)
+  email_decoder()
+  |> d.run(data)
+}
+
 pub type ExternalTrackerStyle {
   Numeric
   Alphanumeric
   Regexp
+}
+
+fn external_tracker_style_from_string(style: String) -> ExternalTrackerStyle {
+  case style {
+    "numeric" -> Numeric
+    "alphanumeric" -> Alphanumeric
+    "regexp" -> Regexp
+    _ -> todo as "Unknown style"
+  }
 }
 
 pub type ExternalTracker {
@@ -874,8 +1139,35 @@ pub type ExternalTracker {
   )
 }
 
+fn external_tracker_decoder() -> d.Decoder(ExternalTracker) {
+  d.into({
+    use external_tracker_format <- d.parameter
+    use external_tracker_regexp_pattern <- d.parameter
+    use external_tracker_style <- d.parameter
+    use external_tracker_url <- d.parameter
+    ExternalTracker(
+      external_tracker_format,
+      external_tracker_regexp_pattern,
+      external_tracker_style |> external_tracker_style_from_string,
+      external_tracker_url
+      )
+  })
+  |> d.field("external_tracker_format", d.string)
+  |> d.field("external_tracker_regexp_pattern", d.string)
+  |> d.field("external_tracker_style", d.string)
+  |> d.field("external_tracker_url", d.string)
+}
+
 pub type ExternalWiki {
   ExternalWiki(external_wiki_url: String)
+}
+
+fn external_wiki_decoder() -> d.Decoder(ExternalWiki) {
+  d.into({
+    use external_wiki_url <- d.parameter
+    ExternalWiki(external_wiki_url)
+  })
+  |> d.field("external_wiki_url", d.string)
 }
 
 pub type FileCommitResponse {
@@ -1058,6 +1350,48 @@ pub type Hook {
   )
 }
 
+fn hook_decoder() -> d.Decoder(Hook) {
+  d.into({
+    use active <- d.parameter
+    use authorization_header <- d.parameter
+    use branch_filter <- d.parameter
+    use config <- d.parameter
+    use content_type <- d.parameter
+    use created_at <- d.parameter
+    use events <- d.parameter
+    use id <- d.parameter
+    use metadata <- d.parameter
+    use hook_type <- d.parameter
+    use updated_at <- d.parameter
+    use url <- d.parameter
+    Hook(active, authorization_header, branch_filter, config, content_type, created_at, events, id, metadata, hook_type, updated_at, url)
+  })
+  |> d.field("active", d.bool)
+  |> d.field("authorization_header", d.string)
+  |> d.field("branch_filter", d.string)
+  |> d.field("config", d.list(d.tuple2(d.string, d.string)))
+  |> d.field("content_type", d.string)
+  |> d.field("created_at", d.string)
+  |> d.field("events", d.list(d.string))
+  |> d.field("id", d.int)
+  |> d.field("metadata", d.dynamic)
+  |> d.field("type", d.string)
+  |> d.field("updated_at", d.string)
+  |> d.field("url", d.string)
+}
+
+pub fn decode_hook_list(json_string json_string: String) -> Result(List(Hook), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(hook_decoder())
+  |> d.run(data)
+}
+
+pub fn decode_hook(json_string json_string: String) -> Result(Hook, json.DecodeError) {
+  use data <- json.decode(json_string)
+  hook_decoder()
+  |> d.run(data)
+}
+
 pub type Identity {
   Identity(email: String, name: String)
 }
@@ -1069,6 +1403,18 @@ pub type InternalTracker {
     enable_time_tracker: Bool,
   )
 }
+
+fn internal_tracker_decoder() -> d.Decoder(InternalTracker) {
+  d.into({
+    use allow_only_contributors_to_track_time <- d.parameter
+    use enable_issue_dependecies <- d.parameter
+    use enable_time_tracker <- d.parameter
+    InternalTracker(allow_only_contributors_to_track_time, enable_issue_dependecies, enable_time_tracker)
+  })
+  |> d.field("allow_only_contributors_to_track_time", d.bool)
+  |> d.field("enable_issue_dependecies", d.bool)
+  |> d.field("enable_time_tracker", d.bool)
+  }
 
 pub type Issue {
   Issue(
@@ -1384,6 +1730,46 @@ pub type Organization {
   )
 }
 
+fn organization_decoder() -> d.Decoder(Organization) {
+  d.into({
+    use avatar_url <- d.parameter
+    use description <- d.parameter
+    use email <- d.parameter
+    use full_name <- d.parameter
+    use id <- d.parameter
+    use location <- d.parameter
+    use name <- d.parameter
+    use repo_admin_change_team_access <- d.parameter
+    use username <- d.parameter
+    use visibility <- d.parameter
+    use website <- d.parameter
+    Organization(avatar_url, description, email, full_name, id, location, name, repo_admin_change_team_access, username, visibility, website)
+  })
+  |> d.field("avatar_url", d.string)
+  |> d.field("description", d.string)
+  |> d.field("email", d.string)
+  |> d.field("full_name", d.string)
+  |> d.field("id", d.int)
+  |> d.field("location", d.string)
+  |> d.field("name", d.string)
+  |> d.field("repo_admin_change_team_access", d.bool)
+  |> d.field("username", d.string)
+  |> d.field("visibility", d.string)
+  |> d.field("website", d.string)
+}
+
+pub fn decode_organization_list(json_string json_string: String) -> Result(List(Organization), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(organization_decoder())
+  |> d.run(data)
+}
+
+pub fn decode_organization(json_string json_string: String) -> Result(Organization, json.DecodeError) {
+  use data <- json.decode(json_string)
+  organization_decoder()
+  |> d.run(data)
+}
+
 pub type OrganizationPermissions {
   OrganizationPermissions(
     can_create_repository: Bool,
@@ -1463,6 +1849,18 @@ pub type Permission {
   Permission(admin: Bool, pull: Bool, push: Bool)
 }
 
+fn permission_decoder() -> d.Decoder(Permission) {
+  d.into({
+    use admin <- d.parameter
+    use pull <- d.parameter
+    use push <- d.parameter
+    Permission(admin, pull, push)
+  })
+  |> d.field("admin", d.bool)
+  |> d.field("pull", d.bool)
+  |> d.field("push", d.bool)
+}
+
 pub type PublicKey {
   PublicKey(
     created_at: String,
@@ -1475,6 +1873,46 @@ pub type PublicKey {
     url: String,
     user: User,
   )
+}
+
+fn public_key_decoder() -> d.Decoder(PublicKey) {
+  d.into({
+    use created_at <- d.parameter
+    use fingerprint <- d.parameter
+    use id <- d.parameter
+    use key <- d.parameter
+    use key_type <- d.parameter
+    use read_only <- d.parameter
+    use title <- d.parameter
+    use url <- d.parameter
+    use user <- d.parameter
+    PublicKey(
+      created_at,
+      fingerprint,
+      id,
+      key,
+      key_type,
+      read_only,
+      title,
+      url,
+      user,
+    )
+  })
+  |> d.field("created_at", d.string)
+  |> d.field("fingerprint", d.string)
+  |> d.field("id", d.int)
+  |> d.field("key", d.string)
+  |> d.field("key_type", d.string)
+  |> d.field("read_only", d.bool)
+  |> d.field("title", d.string)
+  |> d.field("url", d.string)
+  |> d.field("user", user_decoder())
+}
+
+pub fn decode_public_key(json_string json_string: String) -> Result(PublicKey, json.DecodeError) {
+  use data <- json.decode(json_string)
+  public_key_decoder()
+  |> d.run(data)
 }
 
 pub type PullRequest {
@@ -1609,6 +2047,14 @@ pub type RenameUserOption {
   RenameUserOption(new_username: String)
 }
 
+/// Encodes a [RenameUserOption](#RenameUserOption) into a Json string
+/// 
+pub fn encode_rename_user_option(user_option user_option: RenameUserOption) -> String {
+  object([
+    #("new_username", string(user_option.new_username))
+  ]) |> json.to_string
+}
+
 pub type ReplaceFlagsOption {
   ReplaceFlagsOption(flags: List(String))
 }
@@ -1634,6 +2080,19 @@ pub type RepoTopicOptions {
 
 pub type RepoTransfer {
   RepoTransfer(doer: User, recipient: User, teams: List(Team))
+}
+
+fn repo_transfer_decoder() -> d.Decoder(RepoTransfer) {
+  d.into({
+    use doer <- d.parameter
+    use recipient <- d.parameter
+    use teams <- d.parameter
+    RepoTransfer(doer, recipient, teams)
+  })
+  |> d.field("doer", user_decoder())
+  |> d.field("recipient", user_decoder())
+  |> d.field("teams", d.list(team_decoder()))
+
 }
 
 pub type Repository {
@@ -1701,6 +2160,206 @@ pub type Repository {
   )
 }
 
+// FIXME: Probably infinitely recursive oops
+fn repository_decoder() -> d.Decoder(Repository) {
+  d.into({
+    use allow_fast_forward_only_merge <- d.parameter
+    use allow_merge_commits <- d.parameter
+    use allow_rebase <- d.parameter
+    use allow_rebase_explicit <- d.parameter
+    use allow_rebase_update <- d.parameter
+    use allow_squash_merge <- d.parameter
+    use archived <- d.parameter
+    use archived_at <- d.parameter
+    use avatar_url <- d.parameter
+    use clone_url <- d.parameter
+    use created_at <- d.parameter
+    use default_allow_maintainer_edit <- d.parameter
+    use default_branch <- d.parameter
+    use default_delete_branch_after_merge <- d.parameter
+    use default_merge_style <- d.parameter
+    use description <- d.parameter
+    use empty <- d.parameter
+    use external_tracker <- d.parameter
+    use external_wiki <- d.parameter
+    use fork <- d.parameter
+    use forks_count <- d.parameter
+    use full_name <- d.parameter
+    use has_actions <- d.parameter
+    use has_issues <- d.parameter
+    use has_packages <- d.parameter
+    use has_projects <- d.parameter
+    use has_pull_requests <- d.parameter
+    use has_releases <- d.parameter
+    use has_wiki <- d.parameter
+    use html_url <- d.parameter
+    use id <- d.parameter
+    use ignore_whitespace_conflicts <- d.parameter
+    use internal <- d.parameter
+    use internal_tracker <- d.parameter
+    use language <- d.parameter
+    use languages_url <- d.parameter
+    use link <- d.parameter
+    use mirror <- d.parameter
+    use mirror_interval <- d.parameter
+    use mirror_updated <- d.parameter
+    use name <- d.parameter
+    use object_format_name <- d.parameter
+    use open_issues_count <- d.parameter
+    use open_pr_counter <- d.parameter
+    use original_url <- d.parameter
+    use owner <- d.parameter
+    use parent <- d.parameter
+    use permissions <- d.parameter
+    use private <- d.parameter
+    use release_counter <- d.parameter
+    use repo_transfer <- d.parameter
+    use size <- d.parameter
+    use ssh_url <- d.parameter
+    use stars_count <- d.parameter
+    use template <- d.parameter
+    use updated_at <- d.parameter
+    use url <- d.parameter
+    use watchers_count <- d.parameter
+    use website <- d.parameter
+    use wiki_branch <- d.parameter
+    Repository(
+      allow_fast_forward_only_merge,
+      allow_merge_commits,
+      allow_rebase,
+      allow_rebase_explicit,
+      allow_rebase_update,
+      allow_squash_merge,
+      archived,
+      archived_at,
+      avatar_url,
+      clone_url,
+      created_at,
+      default_allow_maintainer_edit,
+      default_branch,
+      default_delete_branch_after_merge,
+      default_merge_style,
+      description,
+      empty,
+      external_tracker,
+      external_wiki,
+      fork,
+      forks_count,
+      full_name,
+      has_actions,
+      has_issues,
+      has_packages,
+      has_projects,
+      has_pull_requests,
+      has_releases,
+      has_wiki,
+      html_url,
+      id,
+      ignore_whitespace_conflicts,
+      internal,
+      internal_tracker,
+      language,
+      languages_url,
+      link,
+      mirror,
+      mirror_interval,
+      mirror_updated,
+      name,
+      object_format_name |> object_format_from_string,
+      open_issues_count,
+      open_pr_counter,
+      original_url,
+      owner,
+      parent,
+      permissions,
+      private,
+      release_counter,
+      repo_transfer,
+      size,
+      ssh_url,
+      stars_count,
+      template,
+      updated_at,
+      url,
+      watchers_count,
+      website,
+      wiki_branch,
+      )
+  })
+  |> d.field("allow_fast_forward_only_merge", d.bool)
+  |> d.field("allow_merge_commits", d.bool)
+  |> d.field("allow_rebase", d.bool)
+  |> d.field("allow_rebase_explicit", d.bool)
+  |> d.field("allow_rebase_update", d.bool)
+  |> d.field("allow_squash_merge", d.bool)
+  |> d.field("archived", d.bool)
+  |> d.field("archived_at", d.string)
+  |> d.field("avatar_url", d.string)
+  |> d.field("clone_url", d.string)
+  |> d.field("created_at", d.string)
+  |> d.field("default_allow_maintainer_edit", d.bool)
+  |> d.field("default_branch", d.string)
+  |> d.field("default_delete_branch_after_merge", d.bool)
+  |> d.field("default_merge_style", d.string)
+  |> d.field("description", d.string)
+  |> d.field("empty", d.bool)
+  |> d.field("external_tracker", external_tracker_decoder())
+  |> d.field("external_wiki", external_wiki_decoder())
+  |> d.field("fork", d.bool)
+  |> d.field("forks_count", d.int)
+  |> d.field("full_name", d.string)
+  |> d.field("has_actions", d.bool)
+  |> d.field("has_issues", d.bool)
+  |> d.field("has_packages", d.bool)
+  |> d.field("has_projects", d.bool)
+  |> d.field("has_pull_requests", d.bool)
+  |> d.field("has_releases", d.bool)
+  |> d.field("has_wiki", d.bool)
+  |> d.field("html_url", d.string)
+  |> d.field("id", d.int)
+  |> d.field("ignore_whitespace_conflicts", d.bool)
+  |> d.field("internal", d.bool)
+  |> d.field("internal_tracker", internal_tracker_decoder())
+  |> d.field("language", d.string)
+  |> d.field("languages_url", d.string)
+  |> d.field("link", d.string)
+  |> d.field("mirror", d.bool)
+  |> d.field("mirror_interval", d.string)
+  |> d.field("mirror_updated", d.string)
+  |> d.field("name", d.string)
+  |> d.field("object_format_name", d.string)
+  |> d.field("open_issues_count", d.int)
+  |> d.field("open_pr_counter", d.int)
+  |> d.field("original_url", d.string)
+  |> d.field("owner", user_decoder())
+  |> d.field("parent", d.optional(repository_decoder()))
+  |> d.field("permissions", permission_decoder())
+  |> d.field("private", d.bool)
+  |> d.field("release_counter", d.int)
+  |> d.field("repo_transfer", repo_transfer_decoder())
+  |> d.field("size", d.int)
+  |> d.field("ssh_url", d.string)
+  |> d.field("stars_count", d.int)
+  |> d.field("template", d.bool)
+  |> d.field("updated_at", d.string)
+  |> d.field("url", d.string)
+  |> d.field("watchers_count", d.int)
+  |> d.field("website", d.string)
+  |> d.field("wiki_branch", d.string)
+}
+
+pub fn decode_repository_list(json_string json_string: String) -> Result(List(Repository), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(repository_decoder())
+  |> d.run(data)
+}
+
+pub fn decode_repository(json_string json_string: String) -> Result(Repository, json.DecodeError) {
+  use data <- json.decode(json_string)
+  repository_decoder()
+  |> d.run(data)
+}
+
 pub type RepositoryMeta {
   RepositoryMeta(full_name: String, id: Int, name: String, owner: String)
 }
@@ -1764,6 +2423,40 @@ pub type Team {
     units: List(String),
     units_map: List(#(String, String)),
   )
+}
+
+fn team_decoder() -> d.Decoder(Team) {
+  d.into({
+    use can_create_org_repo <- d.parameter
+    use description <- d.parameter
+    use id <- d.parameter
+    use includes_all_repositories <- d.parameter
+    use name <- d.parameter
+    use organization <- d.parameter
+    use permission <- d.parameter
+    use units <- d.parameter
+    use units_map <- d.parameter
+    Team(
+      can_create_org_repo,
+      description,
+      id,
+      includes_all_repositories,
+      name,
+      organization,
+      permission |> team_permissions_from_string,
+      units,
+      units_map,
+    )
+  })
+  |> d.field("can_create_org_repo", d.bool)
+  |> d.field("description", d.string)
+  |> d.field("id", d.int)
+  |> d.field("includes_all_repositories", d.bool)
+  |> d.field("name", d.string)
+  |> d.field("organization", organization_decoder())
+  |> d.field("permission", d.string)
+  |> d.field("units", d.list(d.string))
+  |> d.field("units_map", d.list(d.tuple2(d.string, d.string)))
 }
 
 pub type TimeStamp {
@@ -1881,6 +2574,88 @@ pub type User {
     visibility: String,
     website: String,
   )
+}
+
+fn user_decoder() -> d.Decoder(User) {
+  d.into({
+    use active <- d.parameter
+    use avatar_url <- d.parameter
+    use created <- d.parameter
+    use description <- d.parameter
+    use email <- d.parameter
+    use followers_count <- d.parameter
+    use following_count <- d.parameter
+    use full_name <- d.parameter
+    use id <- d.parameter
+    use is_admin <- d.parameter
+    use language <- d.parameter
+    use last_login <- d.parameter
+    use location <- d.parameter
+    use login <- d.parameter
+    use login_name <- d.parameter
+    use prohibit_login <- d.parameter
+    use pronouns <- d.parameter
+    use restricted <- d.parameter
+    use starred_repos_count <- d.parameter
+    use visibility <- d.parameter
+    use website <- d.parameter
+    User(
+      active,
+      avatar_url,
+      created,
+      description,
+      email,
+      followers_count,
+      following_count,
+      full_name,
+      id,
+      is_admin,
+      language,
+      last_login,
+      location,
+      login,
+      login_name,
+      prohibit_login,
+      pronouns,
+      restricted,
+      starred_repos_count,
+      visibility,
+      website,
+    )
+  })
+  |> d.field("active", d.bool)
+  |> d.field("avatar_url", d.string)
+  |> d.field("created", d.string)
+  |> d.field("description", d.string)
+  |> d.field("email", d.string)
+  |> d.field("followers_count", d.int)
+  |> d.field("following_count", d.int)
+  |> d.field("full_name", d.string)
+  |> d.field("id", d.int)
+  |> d.field("is_admin", d.bool)
+  |> d.field("language", d.string)
+  |> d.field("last_login", d.string)
+  |> d.field("location", d.string)
+  |> d.field("login", d.string)
+  |> d.field("login_name", d.string)
+  |> d.field("prohibit_login", d.bool)
+  |> d.field("pronouns", d.string)
+  |> d.field("restricted", d.bool)
+  |> d.field("starred_repos_count", d.int)
+  |> d.field("visibility", d.string)
+  |> d.field("website", d.string)
+}
+
+pub fn decode_user(json_string json_string: String) -> Result(User, json.DecodeError) {
+  use data <- json.decode(json_string)
+  user_decoder()
+  |> d.run(data)
+}
+
+pub fn decode_user_list(json_string json_string: String) -> Result(List(User), json.DecodeError) {
+  use data <- json.decode(json_string)
+  d.list(user_decoder())
+  |> d.run(data)
 }
 
 pub type UserHeatmapData {
