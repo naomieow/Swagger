@@ -800,6 +800,14 @@ fn cron_decoder() -> d.Decoder(Cron) {
   |> d.field("schedule", d.string)
 }
 
+pub fn decode_cron(
+  json_string json_string: String,
+) -> Result(Cron, json.DecodeError) {
+  use data <- json.decode(json_string)
+  cron_decoder()
+  |> d.run(data)
+}
+
 pub fn decode_cron_list(
   json_string json_string: String,
 ) -> Result(List(Cron), json.DecodeError) {
