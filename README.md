@@ -1,4 +1,4 @@
-# swagger
+# Swagger
 
 [![Package Version](https://img.shields.io/hexpm/v/swagger)](https://hex.pm/packages/swagger)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/swagger/)
